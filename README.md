@@ -20,7 +20,7 @@ Generate a Visual Studio Project on Windows:
 git clone --recursive https://github.com/Latios96/owl-starter.git
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release "-DOptiX_ROOT_DIR=C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0" .. --build
+cmake -DCMAKE_BUILD_TYPE=Release "-DOptiX_ROOT_DIR=C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0" ..
 ```
 If this succeeds, you can open the generated Visual Studio project in Visual Studio. You can also use another IDE like Clion, just make sure to pass the `OptiX_ROOT_DIR` in the Cmake options.
 
