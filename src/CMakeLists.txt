@@ -6,7 +6,7 @@ embed_ptx(
         SOURCES
         deviceCode.cu
 )
-add_executable(owl_test main.cpp)
+add_executable(owl_test main.cpp LensSystem.h LensSystem.cpp LensSystems.h)
 target_link_libraries(owl_test
         PRIVATE
         owl_test-ptx
