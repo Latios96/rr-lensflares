@@ -40,5 +40,5 @@ if __name__ == '__main__':
             lens_text+="}}"
             lens_texts.append(lens_text)
 
-    with open("../LensSystems.h", "w") as f:
+    with open("../src/raytraced-lensflares/lib/LensSystems.h", "w") as f:
         f.write(FILE_TEMPLATE.replace("LENSES_PLACEHOLDER", ", ".join(lens_texts)))
