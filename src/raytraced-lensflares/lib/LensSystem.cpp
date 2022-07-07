@@ -38,7 +38,10 @@ Intersection Lens::intersect(const owl::vec3f &position,
   }
   float sgn = (curvatureRadius * direction.z) > 0 ? 1 : -1;
   float t = sqrt(B2_C) * sgn - B;
-  return {direction * t + position};
+  owl::vec3f intersectionPosition = direction * t + position;
+  return {intersectionPosition,
+          normalize(intersectionPosition -
+                    owl::vec3f(0, 0, center - curvatureRadius))};
 }
 Lens::Lens(float curvatureRadius, float thickness, float ior,
            float apertureRadius, float center)

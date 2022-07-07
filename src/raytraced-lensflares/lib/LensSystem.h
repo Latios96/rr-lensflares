@@ -8,6 +8,7 @@
 
 struct Intersection {
   owl::vec3f position;
+  owl::vec3f normal;
   static Intersection createInvalid() {
     return {std::numeric_limits<float>::min()};
   }
