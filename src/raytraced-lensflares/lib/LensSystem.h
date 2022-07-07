@@ -3,6 +3,7 @@
 
 #include "owl/common/math/vec.h"
 #include "owl/owl.h"
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -34,12 +35,24 @@ struct Lens : public LensData {
                          const owl::vec3f &direction);
 };
 
+struct InteractionEvent {
+  int lensIndex;
+  bool refract;
+  InteractionEvent(int lensIndex, bool refract);
+  bool operator==(const InteractionEvent &rhs) const;
+  bool operator!=(const InteractionEvent &rhs) const;
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const InteractionEvent &event);
+};
+
 struct LensSystem {
   std::string name;
   std::vector<Lens> lenses;
   LensSystem(const std::string &name, const std::vector<LensData> &lensesData);
   Intersection traceRay(const owl::vec3f &position,
                         const owl::vec3f &direction);
+
+  std::vector<InteractionEvent> createIdealInteractionSequence() const;
 };
 
 #endif // RR_LENSFLARES_SRC_LENSSYSTEM_H_

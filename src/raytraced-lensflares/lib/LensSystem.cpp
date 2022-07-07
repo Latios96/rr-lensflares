@@ -21,6 +21,14 @@ Intersection LensSystem::traceRay(const owl::vec3f &position,
   }
   return intersection;
 }
+std::vector<InteractionEvent>
+LensSystem::createIdealInteractionSequence() const {
+  std::vector<InteractionEvent> events;
+  for (int i = 0; i < lenses.size(); i++) {
+    events.emplace_back(i, true);
+  }
+  return events;
+}
 
 LensData::LensData(float curvatureRadius, float thickness, float ior,
                    float apertureRadius)
@@ -47,3 +55,16 @@ Lens::Lens(float curvatureRadius, float thickness, float ior,
            float apertureRadius, float center)
     : LensData(curvatureRadius, thickness, ior, apertureRadius),
       center(center) {}
+
+bool InteractionEvent::operator==(const InteractionEvent &rhs) const {
+  return lensIndex == rhs.lensIndex && refract == rhs.refract;
+}
+bool InteractionEvent::operator!=(const InteractionEvent &rhs) const {
+  return !(rhs == *this);
+}
+InteractionEvent::InteractionEvent(int lensIndex, bool refract)
+    : lensIndex(lensIndex), refract(refract) {}
+std::ostream &operator<<(std::ostream &os, const InteractionEvent &event) {
+  os << "lensIndex: " << event.lensIndex << " refract: " << event.refract;
+  return os;
+}
