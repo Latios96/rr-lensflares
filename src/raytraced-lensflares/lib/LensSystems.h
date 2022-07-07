@@ -2,7 +2,7 @@
 #ifndef RR_LENSFLARES_SRC_LENSES_H_
 #define RR_LENSFLARES_SRC_LENSES_H_
 
-#include "shared/LensSystem.h"
+#include "LensSystem.h"
 
 std::vector<LensSystem> getAvailableLensSystems() {
   return {
