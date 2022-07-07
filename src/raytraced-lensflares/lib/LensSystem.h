@@ -10,25 +10,29 @@ struct Intersection {
   owl::vec3f position;
 };
 
-struct Lens {
+struct LensData {
   float curvatureRadius;
   float thickness;
   float ior;
   float apertureRadius;
-  Lens(float curvatureRadius, float thickness, float ior, float apertureRadius);
-
-  Intersection intersect(const owl::vec3f &position, const owl::vec3f &direction);
+  LensData(float curvatureRadius, float thickness, float ior,
+           float apertureRadius);
 };
 
-struct IntersectionSequence{
-  std::vector<int> interfaceIndices;
+struct Lens : public LensData {
+  float center;
+  Lens(float curvatureRadius, float thickness, float ior, float apertureRadius,
+       float center);
+  Intersection intersect(const owl::vec3f &position,
+                         const owl::vec3f &direction);
 };
 
 struct LensSystem {
   std::string name;
   std::vector<Lens> lenses;
-  LensSystem(const std::string &name, const std::vector<Lens> &lenses);
-  Intersection traceRay(const owl::vec3f &position, const owl::vec3f &direction);
+  LensSystem(const std::string &name, const std::vector<LensData> &lensesData);
+  Intersection traceRay(const owl::vec3f &position,
+                        const owl::vec3f &direction);
 };
 
 #endif // RR_LENSFLARES_SRC_LENSSYSTEM_H_
