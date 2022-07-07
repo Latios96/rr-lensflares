@@ -6,6 +6,7 @@ LensSystem::LensSystem(const std::string &name,
     : name(name) {
   float center = 0;
   for (int i = lensesData.size() - 1; i >= 0; i--) {
+    center += lensesData[i].thickness;
     Lens lens(lensesData[i].curvatureRadius, lensesData[i].thickness,
               lensesData[i].ior, lensesData[i].apertureRadius, center);
     lenses.insert(lenses.begin(), lens);
