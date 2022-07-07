@@ -32,7 +32,7 @@ struct Lens : public LensData {
   Lens(float curvatureRadius, float thickness, float ior, float apertureRadius,
        float center);
   Intersection intersect(const owl::vec3f &position,
-                         const owl::vec3f &direction);
+                         const owl::vec3f &direction) const;
 };
 
 struct InteractionEvent {
