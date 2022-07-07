@@ -29,7 +29,16 @@ LensData::LensData(float curvatureRadius, float thickness, float ior,
 
 Intersection Lens::intersect(const owl::vec3f &position,
                              const owl::vec3f &direction) {
-  return Intersection();
+  owl::vec3f D = position - owl::vec3f(0, 0, center - curvatureRadius);
+  float B = dot(D, direction);
+  float C = dot(D, D) - curvatureRadius * curvatureRadius;
+  float B2_C = B * B - C;
+  if (B2_C < 0) {
+    return Intersection::createInvalid();
+  }
+  float sgn = (curvatureRadius * direction.z) > 0 ? 1 : -1;
+  float t = sqrt(B2_C) * sgn - B;
+  return {direction * t + position};
 }
 Lens::Lens(float curvatureRadius, float thickness, float ior,
            float apertureRadius, float center)

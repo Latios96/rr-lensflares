@@ -8,6 +8,12 @@
 
 struct Intersection {
   owl::vec3f position;
+  static Intersection createInvalid() {
+    return {std::numeric_limits<float>::min()};
+  }
+  bool isValid() {
+    return position != owl::vec3f(std::numeric_limits<float>::min());
+  }
 };
 
 struct LensData {

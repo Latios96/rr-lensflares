@@ -1,13 +1,39 @@
 #include "LensSystem.h"
 #include "catch.hpp"
-/*
-TEST_CASE("LensData::intersect") {
-  SECTION("should intersect") {
-    LensData lens(35.98738, 1.21638, 1.54, 23.716);
 
-    //lens.intersect({0,0,0},{0,0,0});
+TEST_CASE("Lens::intersect") {
+  SECTION("should intersect correctly with lens with positive radius") {
+    auto testData = GENERATE(table<owl::vec3f, owl::vec3f>(
+        {{{0, 0, -1}, {0, 0, 2}},
+         {normalize(owl::vec3f(0, 1, -1)), {0, 1.0143f, 1.9857f}}}));
+    owl::vec3f direction = std::get<0>(testData);
+    owl::vec3f position = std::get<1>(testData);
+
+    Lens lens(35.98738, 1.21638, 1.54, 23.716, 2);
+
+    Intersection intersection = lens.intersect({0, 0, 3}, direction);
+
+    REQUIRE(intersection.position.x == Catch::Detail::Approx(position.x));
+    REQUIRE(intersection.position.y == Catch::Detail::Approx(position.y));
+    REQUIRE(intersection.position.z == Catch::Detail::Approx(position.z));
   }
-}*/
+
+  SECTION("should intersect correctly with lens with negative radius") {
+    auto testData = GENERATE(table<owl::vec3f, owl::vec3f>(
+        {{{0, 0, -1}, {0, 0, 2}},
+         {normalize(owl::vec3f(0, 1, -1)), {0, 0.98648f, 2.01352f}}}));
+    owl::vec3f direction = std::get<0>(testData);
+    owl::vec3f position = std::get<1>(testData);
+
+    Lens lens(-35.98738, 1.21638, 1.54, 23.716, 2);
+
+    Intersection intersection = lens.intersect({0, 0, 3}, direction);
+
+    REQUIRE(intersection.position.x == Catch::Detail::Approx(position.x));
+    REQUIRE(intersection.position.y == Catch::Detail::Approx(position.y));
+    REQUIRE(intersection.position.z == Catch::Detail::Approx(position.z));
+  }
+}
 
 TEST_CASE("LensSystem") {
   SECTION("should calculate lens centers correctly") {
