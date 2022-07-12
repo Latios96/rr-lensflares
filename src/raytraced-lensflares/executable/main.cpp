@@ -1,276 +1,211 @@
-// ======================================================================== //
-// Copyright 2019-2020 Ingo Wald                                            //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
-// This program sets up a single geometric object, a mesh for a cube, and
-// its acceleration structure, then ray traces it.
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
-// public owl node-graph API
-#include "owl/owl.h"
-// our device-side data structures
-#include "deviceCode.h"
-// viewer base class, for window and user interaction
-#include "owlViewer/OWLViewer.h"
+#include <fmt/format.h>
+#include <iostream>
+#include <stddef.h>
+#include <stdlib.h>
+#include <vector>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
-#define LOG(message)                                            \
-  std::cout << OWL_TERMINAL_BLUE;                               \
-  std::cout << "#owl.sample(main): " << message << std::endl;   \
-  std::cout << OWL_TERMINAL_DEFAULT;
-#define LOG_OK(message)                                         \
-  std::cout << OWL_TERMINAL_LIGHT_BLUE;                         \
-  std::cout << "#owl.sample(main): " << message << std::endl;   \
-  std::cout << OWL_TERMINAL_DEFAULT;
-
-extern "C" char deviceCode_ptx[];
-
-const int NUM_VERTICES = 8;
-vec3f vertices[NUM_VERTICES] =
-    {
-        { -1.f,-1.f,-1.f },
-        { +1.f,-1.f,-1.f },
-        { -1.f,+1.f,-1.f },
-        { +1.f,+1.f,-1.f },
-        { -1.f,-1.f,+1.f },
-        { +1.f,-1.f,+1.f },
-        { -1.f,+1.f,+1.f },
-        { +1.f,+1.f,+1.f }
-    };
-
-const int NUM_INDICES = 12;
-vec3i indices[NUM_INDICES] =
-    {
-        { 0,1,3 }, { 2,3,0 },
-        { 5,7,6 }, { 5,6,4 },
-        { 0,4,5 }, { 0,5,1 },
-        { 2,3,7 }, { 2,7,6 },
-        { 1,5,7 }, { 1,7,3 },
-        { 4,0,2 }, { 4,2,6 }
-    };
-
-// const vec2i fbSize(800,600);
-const vec3f init_lookFrom(-4.f,+3.f,-2.f);
-const vec3f init_lookAt(0.f,0.f,0.f);
-const vec3f init_lookUp(0.f,1.f,0.f);
-const float init_cosFovy = 0.66f;
-
-
-
-
-
-
-struct Viewer : public owl::viewer::OWLViewer
-{
-    Viewer();
-
-    /*! gets called whenever the viewer needs us to re-render out widget */
-    void render() override;
-
-    /*! window notifies us that we got resized. We HAVE to override
-        this to know our actual render dimensions, and get pointer
-        to the device frame buffer that the viewer cated for us */
-    void resize(const vec2i &newSize) override;
-
-    /*! this function gets called whenever any camera manipulator
-      updates the camera. gets called AFTER all values have been updated */
-    void cameraChanged() override;
-
-    bool sbtDirty = true;
-    OWLRayGen rayGen   { 0 };
-    OWLContext context { 0 };
+struct Vertex {
+  glm::vec3 pos;
 };
 
-/*! window notifies us that we got resized */
-void Viewer::resize(const vec2i &newSize)
-{
-    OWLViewer::resize(newSize);
-    cameraChanged();
+struct Mesh {
+  std::vector<Vertex> vertices;
+  std::vector<unsigned int> indices;
+};
+
+static const char *vertex_shader_text =
+    R"(#version 330
+
+    uniform mat4 MVP;
+    in vec3 vCol;
+    in vec3 vPos;
+    out vec3 color;
+
+    void main(){
+        gl_Position = MVP * vec4(vPos, 1.0);
+        color = vCol;
+    })";
+
+static const char *fragment_shader_text =
+    R"(#version 330
+
+    in vec3 color;
+    out vec4 fragment;
+
+    void main(){
+        fragment = vec4(1.0, 0.0, 0.0, 1.0);
+    })";
+
+static void error_callback(int error, const char *description) {
+  std::cerr << fmt::format("Error: {}", description) << std::endl;
+}
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
+                                GLenum severity, GLsizei length,
+                                const GLchar *message, const void *userParam) {
+  fprintf(stderr,
+          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+          message);
 }
 
-/*! window notifies us that the camera has changed */
-void Viewer::cameraChanged()
-{
-    const vec3f lookFrom = camera.getFrom();
-    const vec3f lookAt = camera.getAt();
-    const vec3f lookUp = camera.getUp();
-    const float cosFovy = camera.getCosFovy();
-    // ----------- compute variable values  ------------------
-    vec3f camera_pos = lookFrom;
-    vec3f camera_d00
-        = normalize(lookAt-lookFrom);
-    float aspect = fbSize.x / float(fbSize.y);
-    vec3f camera_ddu
-        = cosFovy * aspect * normalize(cross(camera_d00,lookUp));
-    vec3f camera_ddv
-        = cosFovy * normalize(cross(camera_ddu,camera_d00));
-    camera_d00 -= 0.5f * camera_ddu;
-    camera_d00 -= 0.5f * camera_ddv;
-
-    // ----------- set variables  ----------------------------
-    owlRayGenSet1ul   (rayGen,"fbPtr",        (uint64_t)fbPointer);
-    // owlRayGenSetBuffer(rayGen,"fbPtr",        frameBuffer);
-    owlRayGenSet2i    (rayGen,"fbSize",       (const owl2i&)fbSize);
-    owlRayGenSet3f    (rayGen,"camera.pos",   (const owl3f&)camera_pos);
-    owlRayGenSet3f    (rayGen,"camera.dir_00",(const owl3f&)camera_d00);
-    owlRayGenSet3f    (rayGen,"camera.dir_du",(const owl3f&)camera_ddu);
-    owlRayGenSet3f    (rayGen,"camera.dir_dv",(const owl3f&)camera_ddv);
-    sbtDirty = true;
+static void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                         int mods) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-Viewer::Viewer()
-{
-    // create a context on the first device:
-    context = owlContextCreate(nullptr,1);
-    OWLModule module = owlModuleCreate(context,deviceCode_ptx);
+void read_obj(std::string objPath, Mesh &mesh) {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
 
-    // ##################################################################
-    // set up all the *GEOMETRY* graph we want to render
-    // ##################################################################
+  std::string err;
 
-    // -------------------------------------------------------
-    // declare geometry type
-    // -------------------------------------------------------
-    OWLVarDecl trianglesGeomVars[] = {
-        { "index",  OWL_BUFPTR, OWL_OFFSETOF(TrianglesGeomData,index)},
-        { "vertex", OWL_BUFPTR, OWL_OFFSETOF(TrianglesGeomData,vertex)},
-        { "color",  OWL_FLOAT3, OWL_OFFSETOF(TrianglesGeomData,color)}
-    };
-    OWLGeomType trianglesGeomType
-        = owlGeomTypeCreate(context,
-                            OWL_TRIANGLES,
-                            sizeof(TrianglesGeomData),
-                            trianglesGeomVars,3);
-    owlGeomTypeSetClosestHit(trianglesGeomType,0,
-                             module,"TriangleMesh");
+  bool success =
+      tinyobj::LoadObj(&attrib, &shapes, &materials, &err, objPath.data());
+  if (!success) {
+    std::cout << "Error when reading obj file: " + err << std::endl;
+    return;
+  }
 
-    // ##################################################################
-    // set up all the *GEOMS* we want to run that code on
-    // ##################################################################
-
-    LOG("building geometries ...");
-
-    // ------------------------------------------------------------------
-    // triangle mesh
-    // ------------------------------------------------------------------
-    OWLBuffer vertexBuffer
-        = owlDeviceBufferCreate(context,OWL_FLOAT3,NUM_VERTICES,vertices);
-    OWLBuffer indexBuffer
-        = owlDeviceBufferCreate(context,OWL_INT3,NUM_INDICES,indices);
-    // OWLBuffer frameBuffer
-    //   = owlHostPinnedBufferCreate(context,OWL_INT,fbSize.x*fbSize.y);
-
-    OWLGeom trianglesGeom
-        = owlGeomCreate(context,trianglesGeomType);
-
-    owlTrianglesSetVertices(trianglesGeom,vertexBuffer,
-                            NUM_VERTICES,sizeof(vec3f),0);
-    owlTrianglesSetIndices(trianglesGeom,indexBuffer,
-                           NUM_INDICES,sizeof(vec3i),0);
-
-    owlGeomSetBuffer(trianglesGeom,"vertex",vertexBuffer);
-    owlGeomSetBuffer(trianglesGeom,"index",indexBuffer);
-    owlGeomSet3f(trianglesGeom,"color",owl3f{0,1,0});
-
-    // ------------------------------------------------------------------
-    // the group/accel for that mesh
-    // ------------------------------------------------------------------
-    OWLGroup trianglesGroup
-        = owlTrianglesGeomGroupCreate(context,1,&trianglesGeom);
-    owlGroupBuildAccel(trianglesGroup);
-    OWLGroup world
-        = owlInstanceGroupCreate(context,1,&trianglesGroup);
-    owlGroupBuildAccel(world);
-
-
-    // ##################################################################
-    // set miss and raygen program required for SBT
-    // ##################################################################
-
-    // -------------------------------------------------------
-    // set up miss prog
-    // -------------------------------------------------------
-    OWLVarDecl missProgVars[]
-        = {
-            { "color0", OWL_FLOAT3, OWL_OFFSETOF(MissProgData,color0)},
-            { "color1", OWL_FLOAT3, OWL_OFFSETOF(MissProgData,color1)},
-            { /* sentinel to mark end of list */ }
-        };
-    // ----------- create object  ----------------------------
-    OWLMissProg missProg
-        = owlMissProgCreate(context,module,"miss",sizeof(MissProgData),
-                            missProgVars,-1);
-
-    // ----------- set variables  ----------------------------
-    owlMissProgSet3f(missProg,"color0",owl3f{.8f,0.f,0.f});
-    owlMissProgSet3f(missProg,"color1",owl3f{.8f,.8f,.8f});
-
-    // -------------------------------------------------------
-    // set up ray gen program
-    // -------------------------------------------------------
-    OWLVarDecl rayGenVars[] = {
-        { "fbPtr",         OWL_RAW_POINTER, OWL_OFFSETOF(RayGenData,fbPtr)},
-        // { "fbPtr",         OWL_BUFPTR, OWL_OFFSETOF(RayGenData,fbPtr)},
-        { "fbSize",        OWL_INT2,   OWL_OFFSETOF(RayGenData,fbSize)},
-        { "world",         OWL_GROUP,  OWL_OFFSETOF(RayGenData,world)},
-        { "camera.pos",    OWL_FLOAT3, OWL_OFFSETOF(RayGenData,camera.pos)},
-        { "camera.dir_00", OWL_FLOAT3, OWL_OFFSETOF(RayGenData,camera.dir_00)},
-        { "camera.dir_du", OWL_FLOAT3, OWL_OFFSETOF(RayGenData,camera.dir_du)},
-        { "camera.dir_dv", OWL_FLOAT3, OWL_OFFSETOF(RayGenData,camera.dir_dv)},
-        { /* sentinel to mark end of list */ }
-    };
-
-    // ----------- create object  ----------------------------
-    rayGen
-        = owlRayGenCreate(context,module,"simpleRayGen",
-                          sizeof(RayGenData),
-                          rayGenVars,-1);
-    /* camera and frame buffer get set in resiez() and cameraChanged() */
-    owlRayGenSetGroup (rayGen,"world",        world);
-
-    // ##################################################################
-    // build *SBT* required to trace the groups
-    // ##################################################################
-
-    owlBuildPrograms(context);
-    owlBuildPipeline(context);
-    owlBuildSBT(context);
-}
-
-void Viewer::render()
-{
-    if (sbtDirty) {
-        owlBuildSBT(context);
-        sbtDirty = false;
+  for (int i = 0; i < attrib.vertices.size(); i = i + 3) {
+    mesh.vertices.push_back(
+        {{attrib.vertices[i], attrib.vertices[i + 1], attrib.vertices[i + 2]}});
+  }
+  for (auto &shape : shapes) {
+    for (auto &indice : shape.mesh.indices) {
+      mesh.indices.push_back(indice.vertex_index);
     }
-    owlRayGenLaunch2D(rayGen,fbSize.x,fbSize.y);
+  }
 }
 
+GLuint compile_shader(const char *shaderCode, GLenum shaderType) {
+  const GLuint shader = glCreateShader(shaderType);
+  glShaderSource(shader, 1, &shaderCode, nullptr);
+  glCompileShader(shader);
 
-int main(int ac, char **av)
-{
-    LOG("owl::ng example '" << av[0] << "' starting up");
+  GLint isCompiled = 0;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+  if (isCompiled == GL_FALSE) {
+    GLint maxLength = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+    std::string infoLog;
+    infoLog.resize(maxLength);
+    glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 
-    Viewer viewer;
-    viewer.camera.setOrientation(init_lookFrom,
-                                 init_lookAt,
-                                 init_lookUp,
-                                 owl::viewer::toDegrees(acosf(init_cosFovy)));
-    viewer.enableFlyMode();
-    viewer.enableInspectMode(owl::box3f(vec3f(-1.f),vec3f(+1.f)));
+    glDeleteShader(shader);
 
-    // ##################################################################
-    // now that everything is ready: launch it ....
-    // ##################################################################
-    viewer.showAndRun();
+    std::cerr << fmt::format(
+        "Error when compiling {} shader: :\n{}",
+        shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment", infoLog);
+    throw std::runtime_error("Error when compiling shader");
+  }
+
+  return shader;
 }
+
+int main() {
+  glfwSetErrorCallback(error_callback);
+
+  if (!glfwInit())
+    exit(EXIT_FAILURE);
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  GLFWwindow *window =
+      glfwCreateWindow(640, 480, "OpenGL Teapot", nullptr, nullptr);
+  if (!window) {
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+
+  glfwSetKeyCallback(window, key_callback);
+
+  glfwMakeContextCurrent(window);
+  gladLoadGL();
+  glfwSwapInterval(1);
+
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(MessageCallback, nullptr);
+
+  Mesh mesh;
+  read_obj("C:\\workspace\\opengl-starter\\teapot.obj", mesh);
+
+  GLuint vertex_buffer;
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex),
+               mesh.vertices.data(), GL_STATIC_DRAW);
+
+  GLuint indices_buffer;
+  glGenBuffers(1, &indices_buffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(),
+               GL_STATIC_DRAW);
+
+  const GLuint vertex_shader =
+      compile_shader(vertex_shader_text, GL_VERTEX_SHADER);
+  const GLuint fragment_shader =
+      compile_shader(fragment_shader_text, GL_FRAGMENT_SHADER);
+
+  const GLuint program = glCreateProgram();
+  glAttachShader(program, vertex_shader);
+  glAttachShader(program, fragment_shader);
+  glLinkProgram(program);
+
+  const GLint mvp_location = glGetUniformLocation(program, "MVP");
+  const GLint vpos_location = glGetAttribLocation(program, "vPos");
+
+  GLuint vertex_array;
+  glGenVertexArrays(1, &vertex_array);
+  glBindVertexArray(vertex_array);
+  glEnableVertexAttribArray(vpos_location);
+  glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                        (void *)offsetof(Vertex, pos));
+
+  while (!glfwWindowShouldClose(window)) {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    const float ratio = width / (float)height;
+
+    glViewport(0, 0, width, height);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glm::mat4x4 m(1.0);
+    glm::mat4x4 p(1.0);
+    glm::mat4x4 mvp(1.0);
+    p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+    mvp = p * m;
+
+    glUseProgram(program);
+    glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glfwDestroyWindow(window);
+
+  glfwTerminate();
+  exit(EXIT_SUCCESS);
+}
+
+//! [code]
