@@ -15,6 +15,11 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#include <filesystem>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#include <whereami.h>
+
 struct Vertex {
   glm::vec3 pos;
 };
@@ -23,29 +28,6 @@ struct Mesh {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
 };
-
-static const char *vertex_shader_text =
-    R"(#version 330
-
-    uniform mat4 MVP;
-    in vec3 vCol;
-    in vec3 vPos;
-    out vec3 color;
-
-    void main(){
-        gl_Position = MVP * vec4(vPos, 1.0);
-        color = vCol;
-    })";
-
-static const char *fragment_shader_text =
-    R"(#version 330
-
-    in vec3 color;
-    out vec4 fragment;
-
-    void main(){
-        fragment = vec4(1.0, 0.0, 0.0, 1.0);
-    })";
 
 static void error_callback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
@@ -115,7 +97,40 @@ GLuint compile_shader(const char *shaderCode, GLenum shaderType) {
   return shader;
 }
 
+static std::string loadShaderFile(const std::string &filename) {
+  int length = wai_getExecutablePath(NULL, 0, NULL);
+  std::string executablePathStr;
+  executablePathStr.resize(length);
+  wai_getExecutablePath(executablePathStr.data(), length, NULL);
+  auto executablePath = std::filesystem::path(executablePathStr);
+  auto executableDirectory = executablePath.parent_path();
+  const std::filesystem::path filePath =
+      executableDirectory / "shader" / filename;
+  if (!std::filesystem::exists(filePath)) {
+    std::string message =
+        fmt::format("Shader source file at given path {} does not exist.",
+                    filePath.string());
+    spdlog::error(message);
+    throw std::runtime_error(message);
+  }
+  std::ifstream t(filePath);
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
+}
+
+static GLuint loadVertexShader() {
+  static std::string vertexShaderCode = loadShaderFile("vertex.glsl");
+  return compile_shader(vertexShaderCode.c_str(), GL_VERTEX_SHADER);
+}
+
+static GLuint loadFragmentShader() {
+  static std::string vertexShaderCode = loadShaderFile("fragment.glsl");
+  return compile_shader(vertexShaderCode.c_str(), GL_FRAGMENT_SHADER);
+}
+
 int main() {
+  auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(error_callback);
 
   if (!glfwInit())
@@ -157,10 +172,8 @@ int main() {
                mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(),
                GL_STATIC_DRAW);
 
-  const GLuint vertex_shader =
-      compile_shader(vertex_shader_text, GL_VERTEX_SHADER);
-  const GLuint fragment_shader =
-      compile_shader(fragment_shader_text, GL_FRAGMENT_SHADER);
+  const GLuint vertex_shader = loadVertexShader();
+  const GLuint fragment_shader = loadFragmentShader();
 
   const GLuint program = glCreateProgram();
   glAttachShader(program, vertex_shader);
