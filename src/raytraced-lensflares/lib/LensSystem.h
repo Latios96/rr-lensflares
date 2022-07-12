@@ -68,6 +68,15 @@ struct InteractionEvent {
                                   const InteractionEvent &event);
 };
 
+struct ReflectionEvent {
+  int indexFirstReflected, indexLastReflected;
+  ReflectionEvent(int indexFirstReflected, int indexLastReflected);
+  bool operator==(const ReflectionEvent &rhs) const;
+  bool operator!=(const ReflectionEvent &rhs) const;
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const ReflectionEvent &event);
+};
+
 struct LensSystem {
   std::string name;
   std::vector<Lens> lenses;
@@ -75,6 +84,7 @@ struct LensSystem {
   Intersection traceRay(const glm::vec3 &position, const glm::vec3 &direction);
 
   std::vector<InteractionEvent> createIdealInteractionSequence() const;
+  std::vector<ReflectionEvent> createReflectionSequences() const;
 
   glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events,
                              const glm::vec3 &position,

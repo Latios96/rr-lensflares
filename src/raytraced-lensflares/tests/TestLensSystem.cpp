@@ -79,3 +79,35 @@ TEST_CASE("LensSystem::traceToFilmPlane") {
     REQUIRE(positionOnFilm == glm::vec3(0, 0, 0));
   }
 }
+
+TEST_CASE("LensSystem::createReflectionSequences") {
+  SECTION("should correctly create sequence for system with two lenses") {
+    LensSystem lensSystem = getAvailableLensSystems()[0];
+
+    auto sequence = lensSystem.createReflectionSequences();
+
+    REQUIRE(sequence == std::vector<ReflectionEvent>({{1, 0}}));
+  }
+  SECTION("should correctly create sequence for system with six lenses and one "
+          "aperture") {
+    LensSystem lensSystem = getAvailableLensSystems()[1];
+
+    auto sequence = lensSystem.createReflectionSequences();
+    // 2 is aperture, skip it
+    REQUIRE(sequence == std::vector<ReflectionEvent>({{6, 0},
+                                                      {5, 0},
+                                                      {4, 0},
+                                                      {3, 0},
+                                                      {1, 0},
+                                                      {6, 1},
+                                                      {5, 1},
+                                                      {4, 1},
+                                                      {3, 1},
+                                                      {6, 3},
+                                                      {5, 3},
+                                                      {4, 3},
+                                                      {6, 4},
+                                                      {5, 4},
+                                                      {6, 5}}));
+  }
+}

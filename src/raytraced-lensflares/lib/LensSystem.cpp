@@ -1,4 +1,5 @@
 #include "LensSystem.h"
+#include <fmt/format.h>
 
 LensSystem::LensSystem(const std::string &name,
                        const std::vector<LensData> &lensesData)
@@ -27,6 +28,24 @@ LensSystem::createIdealInteractionSequence() const {
     events.emplace_back(i, true);
   }
   return events;
+}
+
+std::vector<ReflectionEvent> LensSystem::createReflectionSequences() const {
+  const int totalSequenceCount = lenses.size() * (lenses.size() - 2) / 2;
+  std::vector<ReflectionEvent> sequences;
+  sequences.reserve(totalSequenceCount);
+  for (int firstIndex = 0; firstIndex < lenses.size(); firstIndex++) {
+    for (int lastIndex = lenses.size() - 1; lastIndex > firstIndex;
+         lastIndex--) {
+      const bool involvesAperture = lenses[firstIndex].curvatureRadius == 0 ||
+                                    lenses[lastIndex].curvatureRadius == 0;
+      if (involvesAperture) {
+        continue;
+      }
+      sequences.emplace_back(lastIndex, firstIndex);
+    }
+  }
+  return sequences;
 }
 
 glm::vec3
@@ -91,4 +110,20 @@ InteractionEvent::InteractionEvent(int lensIndex, bool refract)
 std::ostream &operator<<(std::ostream &os, const InteractionEvent &event) {
   os << "lensIndex: " << event.lensIndex << " refract: " << event.refract;
   return os;
+}
+ReflectionEvent::ReflectionEvent(int indexFirstReflected,
+                                 int indexLastReflected)
+    : indexFirstReflected(indexFirstReflected),
+      indexLastReflected(indexLastReflected) {}
+std::ostream &operator<<(std::ostream &os, const ReflectionEvent &event) {
+  os << fmt::format("({},{})", event.indexFirstReflected,
+                    event.indexLastReflected);
+  return os;
+}
+bool ReflectionEvent::operator==(const ReflectionEvent &rhs) const {
+  return indexFirstReflected == rhs.indexFirstReflected &&
+         indexLastReflected == rhs.indexLastReflected;
+}
+bool ReflectionEvent::operator!=(const ReflectionEvent &rhs) const {
+  return !(rhs == *this);
 }
