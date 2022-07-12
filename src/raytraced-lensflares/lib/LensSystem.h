@@ -3,6 +3,7 @@
 
 #include "owl/common/math/vec.h"
 #include "owl/owl.h"
+#include <algorithm>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -15,6 +16,23 @@ struct Intersection {
   }
   bool isValid() {
     return position != owl::vec3f(std::numeric_limits<float>::min());
+  }
+  owl::vec3f reflect(const owl::vec3f &direction) const {
+    return direction - 2.0f * dot(direction, normal) * normal;
+  }
+  owl::vec3f refract(const owl::vec3f &direction, float iorIn,
+                     float iorOut) const {
+    float cosi = std::clamp(dot(direction, normal), -1.0f, 1.0f);
+    owl::vec3f n = normal;
+    if (cosi < 0) {
+      cosi = -cosi;
+    } else {
+      std::swap(iorIn, iorOut);
+      n = -normal;
+    }
+    float eta = iorIn / iorOut;
+    float k = 1 - eta * eta * (1 - cosi * cosi);
+    return k < 0 ? 0 : eta * direction + (eta * cosi - sqrtf(k)) * n;
   }
 };
 
@@ -53,6 +71,10 @@ struct LensSystem {
                         const owl::vec3f &direction);
 
   std::vector<InteractionEvent> createIdealInteractionSequence() const;
+
+  owl::vec3f traceToFilmPlane(const std::vector<InteractionEvent> &events,
+                              const owl::vec3f &position,
+                              const owl::vec3f &direction) const;
 };
 
 #endif // RR_LENSFLARES_SRC_LENSSYSTEM_H_

@@ -10,7 +10,6 @@ LensSystem::LensSystem(const std::string &name,
     Lens lens(lensesData[i].curvatureRadius, lensesData[i].thickness,
               lensesData[i].ior, lensesData[i].apertureRadius, center);
     lenses.insert(lenses.begin(), lens);
-    center += lensesData[i].thickness;
   }
 }
 
@@ -29,6 +28,31 @@ LensSystem::createIdealInteractionSequence() const {
     events.emplace_back(i, true);
   }
   return events;
+}
+
+owl::vec3f
+LensSystem::traceToFilmPlane(const std::vector<InteractionEvent> &events,
+                             const owl::vec3f &position,
+                             const owl::vec3f &direction) const {
+  owl::vec3f tracedPosition = position;
+  owl::vec3f tracedDirection = direction;
+  float ior = 1;
+  for (auto &event : events) {
+    const auto lens = lenses[event.lensIndex];
+    if (lens.ior == 0) {
+      continue;
+    }
+    const auto intersection = lens.intersect(tracedPosition, tracedDirection);
+    tracedPosition = intersection.position;
+    if (event.refract) {
+      tracedDirection = intersection.refract(tracedDirection, ior, lens.ior);
+      ior = lens.ior;
+    } else {
+      tracedDirection = intersection.reflect(tracedDirection);
+    }
+  }
+  float t = (-tracedPosition.z) / tracedDirection.z;
+  return tracedPosition + tracedDirection * t;
 }
 
 LensData::LensData(float curvatureRadius, float thickness, float ior,

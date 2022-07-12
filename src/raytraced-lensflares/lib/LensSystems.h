@@ -296,7 +296,6 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {62.857, 3.071, 1.773, 12.6},
            {-466.815, 40.08, 1, 12.6},
        }},
-      {"# no lens element, only aperture", {}},
       {"# petzval-type photographic objective US2500046A (1948), scale 50%",
        {
            {-56.79, 4.5, 1.617, 23.0},

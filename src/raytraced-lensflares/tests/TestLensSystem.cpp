@@ -1,4 +1,5 @@
 #include "LensSystem.h"
+#include "LensSystems.h"
 #include "catch.hpp"
 
 TEST_CASE("Lens::intersect") {
@@ -65,5 +66,17 @@ TEST_CASE("LensSystem::createIdealInteractionSequence") {
 
     REQUIRE(sequence ==
             std::vector<InteractionEvent>({{0, true}, {1, true}, {2, true}}));
+  }
+}
+
+TEST_CASE("LensSystem::traceToFilmPlane") {
+  SECTION("should trace ray along optical axis to origin") {
+    LensSystem lensSystem = getAvailableLensSystems()[3];
+    auto sequence = lensSystem.createIdealInteractionSequence();
+
+    auto positionOnFilm =
+        lensSystem.traceToFilmPlane(sequence, {0, 0, 190}, {0, 0, -1});
+
+    REQUIRE(positionOnFilm == owl::vec3f(0, 0, 0));
   }
 }
