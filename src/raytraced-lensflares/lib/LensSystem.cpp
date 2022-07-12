@@ -1,5 +1,4 @@
 #include "LensSystem.h"
-#include "owl/common/math/vec.h"
 
 LensSystem::LensSystem(const std::string &name,
                        const std::vector<LensData> &lensesData)
@@ -13,8 +12,8 @@ LensSystem::LensSystem(const std::string &name,
   }
 }
 
-Intersection LensSystem::traceRay(const owl::vec3f &position,
-                                  const owl::vec3f &direction) {
+Intersection LensSystem::traceRay(const glm::vec3 &position,
+                                  const glm::vec3 &direction) {
   Intersection intersection;
   for (auto &lens : lenses) {
     intersection = lens.intersect(position, direction);
@@ -30,12 +29,12 @@ LensSystem::createIdealInteractionSequence() const {
   return events;
 }
 
-owl::vec3f
+glm::vec3
 LensSystem::traceToFilmPlane(const std::vector<InteractionEvent> &events,
-                             const owl::vec3f &position,
-                             const owl::vec3f &direction) const {
-  owl::vec3f tracedPosition = position;
-  owl::vec3f tracedDirection = direction;
+                             const glm::vec3 &position,
+                             const glm::vec3 &direction) const {
+  glm::vec3 tracedPosition = position;
+  glm::vec3 tracedDirection = direction;
   float ior = 1;
   for (auto &event : events) {
     const auto lens = lenses[event.lensIndex];
@@ -60,9 +59,9 @@ LensData::LensData(float curvatureRadius, float thickness, float ior,
     : curvatureRadius(curvatureRadius), thickness(thickness), ior(ior),
       apertureRadius(apertureRadius) {}
 
-Intersection Lens::intersect(const owl::vec3f &position,
-                             const owl::vec3f &direction) const {
-  owl::vec3f D = position - owl::vec3f(0, 0, center - curvatureRadius);
+Intersection Lens::intersect(const glm::vec3 &position,
+                             const glm::vec3 &direction) const {
+  glm::vec3 D = position - glm::vec3(0, 0, center - curvatureRadius);
   float B = dot(D, direction);
   float C = dot(D, D) - curvatureRadius * curvatureRadius;
   float B2_C = B * B - C;
@@ -71,10 +70,10 @@ Intersection Lens::intersect(const owl::vec3f &position,
   }
   float sgn = (curvatureRadius * direction.z) > 0 ? 1 : -1;
   float t = sqrt(B2_C) * sgn - B;
-  owl::vec3f intersectionPosition = direction * t + position;
+  glm::vec3 intersectionPosition = direction * t + position;
   return {intersectionPosition,
           normalize(intersectionPosition -
-                    owl::vec3f(0, 0, center - curvatureRadius))};
+                    glm::vec3(0, 0, center - curvatureRadius))};
 }
 Lens::Lens(float curvatureRadius, float thickness, float ior,
            float apertureRadius, float center)

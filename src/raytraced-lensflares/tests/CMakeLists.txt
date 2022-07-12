@@ -1,6 +1,5 @@
 add_executable(rr-lensflares-tests
         main.cpp
-        catch.hpp
         TestLensSystem.cpp
         )
 target_link_libraries(rr-lensflares-tests PUBLIC

@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_RUNNER
 
-#include "catch.hpp"
+#include <catch2/catch_session.hpp>
 
 int main(int argc, char *argv[]) {
   int result = Catch::Session().run(argc, argv);

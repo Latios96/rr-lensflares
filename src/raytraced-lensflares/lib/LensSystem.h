@@ -1,29 +1,33 @@
 #ifndef RR_LENSFLARES_SRC_LENSSYSTEM_H_
 #define RR_LENSFLARES_SRC_LENSSYSTEM_H_
 
-#include "owl/common/math/vec.h"
-#include "owl/owl.h"
 #include <algorithm>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 #include <ostream>
 #include <string>
 #include <vector>
 
 struct Intersection {
-  owl::vec3f position;
-  owl::vec3f normal;
+  glm::vec3 position;
+  glm::vec3 normal;
   static Intersection createInvalid() {
-    return {std::numeric_limits<float>::min()};
+    return {
+        {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+         std::numeric_limits<float>::min()},
+        {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+         std::numeric_limits<float>::min()}};
   }
   bool isValid() {
-    return position != owl::vec3f(std::numeric_limits<float>::min());
+    return position != glm::vec3(std::numeric_limits<float>::min());
   }
-  owl::vec3f reflect(const owl::vec3f &direction) const {
-    return direction - 2.0f * dot(direction, normal) * normal;
+  glm::vec3 reflect(const glm::vec3 &direction) const {
+    return direction - 2.0f * glm::dot(direction, normal) * normal;
   }
-  owl::vec3f refract(const owl::vec3f &direction, float iorIn,
-                     float iorOut) const {
-    float cosi = std::clamp(dot(direction, normal), -1.0f, 1.0f);
-    owl::vec3f n = normal;
+  glm::vec3 refract(const glm::vec3 &direction, float iorIn,
+                    float iorOut) const {
+    float cosi = std::clamp(glm::dot(direction, normal), -1.0f, 1.0f);
+    glm::vec3 n = normal;
     if (cosi < 0) {
       cosi = -cosi;
     } else {
@@ -32,7 +36,8 @@ struct Intersection {
     }
     float eta = iorIn / iorOut;
     float k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0 ? 0 : eta * direction + (eta * cosi - sqrtf(k)) * n;
+    return k < 0 ? glm::vec3(0, 0, 0)
+                 : eta * direction + (eta * cosi - sqrtf(k)) * n;
   }
 };
 
@@ -49,8 +54,8 @@ struct Lens : public LensData {
   float center;
   Lens(float curvatureRadius, float thickness, float ior, float apertureRadius,
        float center);
-  Intersection intersect(const owl::vec3f &position,
-                         const owl::vec3f &direction) const;
+  Intersection intersect(const glm::vec3 &position,
+                         const glm::vec3 &direction) const;
 };
 
 struct InteractionEvent {
@@ -67,14 +72,13 @@ struct LensSystem {
   std::string name;
   std::vector<Lens> lenses;
   LensSystem(const std::string &name, const std::vector<LensData> &lensesData);
-  Intersection traceRay(const owl::vec3f &position,
-                        const owl::vec3f &direction);
+  Intersection traceRay(const glm::vec3 &position, const glm::vec3 &direction);
 
   std::vector<InteractionEvent> createIdealInteractionSequence() const;
 
-  owl::vec3f traceToFilmPlane(const std::vector<InteractionEvent> &events,
-                              const owl::vec3f &position,
-                              const owl::vec3f &direction) const;
+  glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events,
+                             const glm::vec3 &position,
+                             const glm::vec3 &direction) const;
 };
 
 #endif // RR_LENSFLARES_SRC_LENSSYSTEM_H_
