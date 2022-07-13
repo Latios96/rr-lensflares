@@ -5,31 +5,24 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
 
 #include <fmt/format.h>
 #include <iostream>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string>
 #include <vector>
-#define TINYOBJLOADER_IMPLEMENTATION
+
+#include "Geometry.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
-#include "tiny_obj_loader.h"
 
 #include <filesystem>
+#include <fstream>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+#include <sstream>
 #include <whereami.h>
-
-struct Vertex {
-  glm::vec3 pos;
-};
-
-struct Mesh {
-  std::vector<Vertex> vertices;
-  std::vector<unsigned int> indices;
-};
 
 static void error_callback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
@@ -47,31 +40,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action,
                          int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
-void read_obj(std::string objPath, Mesh &mesh) {
-  tinyobj::attrib_t attrib;
-  std::vector<tinyobj::shape_t> shapes;
-  std::vector<tinyobj::material_t> materials;
-
-  std::string err;
-
-  bool success =
-      tinyobj::LoadObj(&attrib, &shapes, &materials, &err, objPath.data());
-  if (!success) {
-    std::cout << "Error when reading obj file: " + err << std::endl;
-    return;
-  }
-
-  for (int i = 0; i < attrib.vertices.size(); i = i + 3) {
-    mesh.vertices.push_back(
-        {{attrib.vertices[i], attrib.vertices[i + 1], attrib.vertices[i + 2]}});
-  }
-  for (auto &shape : shapes) {
-    for (auto &indice : shape.mesh.indices) {
-      mesh.indices.push_back(indice.vertex_index);
-    }
-  }
 }
 
 GLuint compile_shader(const char *shaderCode, GLenum shaderType) {
@@ -182,7 +150,7 @@ int main() {
   glDebugMessageCallback(MessageCallback, nullptr);
 
   Mesh mesh;
-  read_obj("C:\\workspace\\opengl-starter\\teapot.obj", mesh);
+  readObj("C:\\workspace\\opengl-starter\\teapot.obj", mesh);
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
