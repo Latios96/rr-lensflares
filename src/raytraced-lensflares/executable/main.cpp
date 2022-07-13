@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <vector>
 #define TINYOBJLOADER_IMPLEMENTATION
+#include "LensSystem.h"
+#include "LensSystems.h"
 #include "tiny_obj_loader.h"
 
 #include <filesystem>
@@ -137,7 +139,7 @@ int main() {
     exit(EXIT_FAILURE);
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   GLFWwindow *window =
@@ -190,6 +192,17 @@ int main() {
   glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, pos));
 
+  LensSystem lensSystem = getAvailableLensSystems()[1];
+  auto sequences = lensSystem.createReflectionSequences();
+  GLuint ssbo;
+  glGenBuffers(1, &ssbo);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, sequences.size() * sizeof(int) * 2,
+               sequences.data(),
+               GL_STATIC_DRAW); // sizeof(data) only works for statically sized
+                                // C/C++ arrays.
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+
   while (!glfwWindowShouldClose(window)) {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -209,6 +222,7 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
