@@ -3,10 +3,12 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <fmt/format.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/mat4x4.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
-#include <fmt/format.h>
 #include <iostream>
 #include <stddef.h>
 #include <stdlib.h>
@@ -14,15 +16,9 @@
 #include <vector>
 
 #include "Geometry.h"
+#include "GlslShaders.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
-
-#include <filesystem>
-#include <fstream>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-#include <sstream>
-#include <whereami.h>
 
 static void error_callback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
@@ -40,63 +36,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action,
                          int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
-GLuint compile_shader(const char *shaderCode, GLenum shaderType) {
-  const GLuint shader = glCreateShader(shaderType);
-  glShaderSource(shader, 1, &shaderCode, nullptr);
-  glCompileShader(shader);
-
-  GLint isCompiled = 0;
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-  if (isCompiled == GL_FALSE) {
-    GLint maxLength = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-    std::string infoLog;
-    infoLog.resize(maxLength);
-    glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-
-    glDeleteShader(shader);
-
-    std::cerr << fmt::format(
-        "Error when compiling {} shader: :\n{}",
-        shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment", infoLog);
-    throw std::runtime_error("Error when compiling shader");
-  }
-
-  return shader;
-}
-
-static std::string loadShaderFile(const std::string &filename) {
-  int length = wai_getExecutablePath(NULL, 0, NULL);
-  std::string executablePathStr;
-  executablePathStr.resize(length);
-  wai_getExecutablePath(executablePathStr.data(), length, NULL);
-  auto executablePath = std::filesystem::path(executablePathStr);
-  auto executableDirectory = executablePath.parent_path();
-  const std::filesystem::path filePath =
-      executableDirectory / "shader" / filename;
-  if (!std::filesystem::exists(filePath)) {
-    std::string message =
-        fmt::format("Shader source file at given path {} does not exist.",
-                    filePath.string());
-    spdlog::error(message);
-    throw std::runtime_error(message);
-  }
-  std::ifstream t(filePath);
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
-
-static GLuint loadVertexShader() {
-  static std::string vertexShaderCode = loadShaderFile("vertex.glsl");
-  return compile_shader(vertexShaderCode.c_str(), GL_VERTEX_SHADER);
-}
-
-static GLuint loadFragmentShader() {
-  static std::string vertexShaderCode = loadShaderFile("fragment.glsl");
-  return compile_shader(vertexShaderCode.c_str(), GL_FRAGMENT_SHADER);
 }
 
 template <typename A, typename B>
@@ -165,8 +104,8 @@ int main() {
                mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(),
                GL_STATIC_DRAW);
 
-  const GLuint vertex_shader = loadVertexShader();
-  const GLuint fragment_shader = loadFragmentShader();
+  const GLuint vertex_shader = GlslShaders::loadVertexShader();
+  const GLuint fragment_shader = GlslShaders::loadFragmentShader();
 
   const GLuint program = glCreateProgram();
   glAttachShader(program, vertex_shader);
