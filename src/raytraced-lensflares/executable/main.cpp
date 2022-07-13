@@ -19,6 +19,7 @@
 #include "GlslShaders.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
+#include "Resources.h"
 
 static void errorCallback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
@@ -85,7 +86,7 @@ int main() {
   glDebugMessageCallback(MessageCallback, nullptr);
 
   Mesh mesh;
-  readObj("C:\\workspace\\opengl-starter\\teapot.obj", mesh);
+  readObj(Resources::getMeshResourceByName("grid.obj").string(), mesh);
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);

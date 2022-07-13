@@ -11,3 +11,6 @@ target_link_libraries(raytraced-lensflares
 
 add_custom_command(TARGET raytraced-lensflares PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/shader ${CMAKE_BINARY_DIR}/bin/shader)
+
+add_custom_command(TARGET raytraced-lensflares PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/meshes ${CMAKE_BINARY_DIR}/bin/meshes)
