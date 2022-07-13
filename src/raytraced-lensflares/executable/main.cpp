@@ -131,6 +131,29 @@ static GLuint loadFragmentShader() {
   return compile_shader(vertexShaderCode.c_str(), GL_FRAGMENT_SHADER);
 }
 
+template <typename A, typename B>
+void toAlignedVector(const std::vector<A> &source, std::vector<B> &target) {
+  target.reserve(source.size());
+  for (const auto &a : source) {
+    target.emplace_back(a);
+  }
+}
+
+template <typename T, typename A>
+GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
+  std::vector<A> aligned;
+  toAlignedVector(source, aligned);
+
+  GLuint ssbo;
+  glGenBuffers(1, &ssbo);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, aligned.size() * sizeof(A),
+               aligned.data(), GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssboBindingLocation, ssbo);
+
+  return ssbo;
+}
+
 int main() {
   auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(error_callback);
@@ -194,14 +217,10 @@ int main() {
 
   LensSystem lensSystem = getAvailableLensSystems()[1];
   auto sequences = lensSystem.createReflectionSequences();
-  GLuint ssbo;
-  glGenBuffers(1, &ssbo);
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, sequences.size() * sizeof(int) * 2,
-               sequences.data(),
-               GL_STATIC_DRAW); // sizeof(data) only works for statically sized
-                                // C/C++ arrays.
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+
+  GLuint ssboReflectionEvents =
+      populateSSBO<ReflectionEvent, ReflectionEvent>(3, sequences);
+  GLuint ssboLensSystem = populateSSBO<Lens, Lens>(4, lensSystem.lenses);
 
   while (!glfwWindowShouldClose(window)) {
     int width, height;
@@ -222,7 +241,8 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
