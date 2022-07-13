@@ -20,7 +20,7 @@
 #include "LensSystem.h"
 #include "LensSystems.h"
 
-static void error_callback(int error, const char *description) {
+static void errorCallback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
 }
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
@@ -63,7 +63,7 @@ GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
 
 int main() {
   auto console = spdlog::stdout_color_mt("console");
-  glfwSetErrorCallback(error_callback);
+  glfwSetErrorCallback(errorCallback);
 
   if (!glfwInit())
     exit(EXIT_FAILURE);
