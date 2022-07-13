@@ -11,21 +11,21 @@
 struct Intersection {
   glm::vec3 position;
   glm::vec3 normal;
+
   static Intersection createInvalid() {
-    return {
-        {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-         std::numeric_limits<float>::min()},
-        {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-         std::numeric_limits<float>::min()}};
+    return {{std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+             std::numeric_limits<float>::min()},
+            {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+             std::numeric_limits<float>::min()}};
   }
-  bool isValid() {
-    return position != glm::vec3(std::numeric_limits<float>::min());
-  }
+
+  bool isValid() { return position != glm::vec3(std::numeric_limits<float>::min()); }
+
   glm::vec3 reflect(const glm::vec3 &direction) const {
     return direction - 2.0f * glm::dot(direction, normal) * normal;
   }
-  glm::vec3 refract(const glm::vec3 &direction, float iorIn,
-                    float iorOut) const {
+
+  glm::vec3 refract(const glm::vec3 &direction, float iorIn, float iorOut) const {
     float cosi = std::clamp(glm::dot(direction, normal), -1.0f, 1.0f);
     glm::vec3 n = normal;
     if (cosi < 0) {
@@ -36,8 +36,7 @@ struct Intersection {
     }
     float eta = iorIn / iorOut;
     float k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0 ? glm::vec3(0, 0, 0)
-                 : eta * direction + (eta * cosi - sqrtf(k)) * n;
+    return k < 0 ? glm::vec3(0, 0, 0) : eta * direction + (eta * cosi - sqrtf(k)) * n;
   }
 };
 
@@ -46,16 +45,13 @@ struct LensData {
   float thickness;
   float ior;
   float apertureRadius;
-  LensData(float curvatureRadius, float thickness, float ior,
-           float apertureRadius);
+  LensData(float curvatureRadius, float thickness, float ior, float apertureRadius);
 };
 
 struct Lens : public LensData {
   float center;
-  Lens(float curvatureRadius, float thickness, float ior, float apertureRadius,
-       float center);
-  Intersection intersect(const glm::vec3 &position,
-                         const glm::vec3 &direction) const;
+  Lens(float curvatureRadius, float thickness, float ior, float apertureRadius, float center);
+  Intersection intersect(const glm::vec3 &position, const glm::vec3 &direction) const;
 };
 
 struct InteractionEvent {
@@ -64,8 +60,7 @@ struct InteractionEvent {
   InteractionEvent(int lensIndex, bool refract);
   bool operator==(const InteractionEvent &rhs) const;
   bool operator!=(const InteractionEvent &rhs) const;
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const InteractionEvent &event);
+  friend std::ostream &operator<<(std::ostream &os, const InteractionEvent &event);
 };
 
 struct ReflectionEvent {
@@ -73,8 +68,7 @@ struct ReflectionEvent {
   ReflectionEvent(int indexFirstReflected, int indexLastReflected);
   bool operator==(const ReflectionEvent &rhs) const;
   bool operator!=(const ReflectionEvent &rhs) const;
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const ReflectionEvent &event);
+  friend std::ostream &operator<<(std::ostream &os, const ReflectionEvent &event);
 };
 
 struct LensSystem {
@@ -86,8 +80,7 @@ struct LensSystem {
   std::vector<InteractionEvent> createIdealInteractionSequence() const;
   std::vector<ReflectionEvent> createReflectionSequences() const;
 
-  glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events,
-                             const glm::vec3 &position,
+  glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events, const glm::vec3 &position,
                              const glm::vec3 &direction) const;
 };
 

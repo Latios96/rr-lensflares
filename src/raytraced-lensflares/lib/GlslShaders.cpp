@@ -13,13 +13,11 @@ GLuint GlslShaders::loadFragmentShader() {
 std::string GlslShaders::loadShaderFile(const std::string &filename) {
   std::filesystem::path executableDirectory = getExecutableDirectory();
 
-  const std::filesystem::path filePath =
-      executableDirectory / "shader" / filename;
+  const std::filesystem::path filePath = executableDirectory / "shader" / filename;
 
   if (!std::filesystem::exists(filePath)) {
     Utils::logAndThrow<std::runtime_error>(
-        fmt::format("Shader source file at given path {} does not exist.",
-                    filePath.string()));
+        fmt::format("Shader source file at given path {} does not exist.", filePath.string()));
   }
 
   std::ifstream t(filePath);
@@ -54,9 +52,9 @@ GLuint GlslShaders::compileShader(const char *shaderCode, GLenum shaderType) {
 
     glDeleteShader(shader);
 
-    Utils::logAndThrow<std::runtime_error>(fmt::format(
-        "Error when compiling {} shader: :\n{}",
-        shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment", infoLog));
+    Utils::logAndThrow<std::runtime_error>(
+        fmt::format("Error when compiling {} shader: :\n{}",
+                    shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment", infoLog));
   }
 
   return shader;

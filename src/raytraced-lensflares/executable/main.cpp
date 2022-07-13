@@ -23,17 +23,14 @@
 static void errorCallback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
 }
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
-                                GLenum severity, GLsizei length,
-                                const GLchar *message, const void *userParam) {
-  fprintf(stderr,
-          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
-          message);
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                                GLsizei length, const GLchar *message, const void *userParam) {
+  fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action,
-                         int mods) {
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
@@ -54,8 +51,8 @@ GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
   GLuint ssbo;
   glGenBuffers(1, &ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, aligned.size() * sizeof(A),
-               aligned.data(), GL_STATIC_DRAW);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, aligned.size() * sizeof(A), aligned.data(),
+               GL_STATIC_DRAW);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssboBindingLocation, ssbo);
 
   return ssbo;
@@ -72,8 +69,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window =
-      glfwCreateWindow(640, 480, "OpenGL Teapot", nullptr, nullptr);
+  GLFWwindow *window = glfwCreateWindow(640, 480, "OpenGL Teapot", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -94,15 +90,14 @@ int main() {
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex),
-               mesh.vertices.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), mesh.vertices.data(),
+               GL_STATIC_DRAW);
 
   GLuint indices_buffer;
   glGenBuffers(1, &indices_buffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(),
-               GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int),
+               mesh.indices.data(), GL_STATIC_DRAW);
 
   const GLuint vertex_shader = GlslShaders::loadVertexShader();
   const GLuint fragment_shader = GlslShaders::loadFragmentShader();
@@ -125,8 +120,7 @@ int main() {
   LensSystem lensSystem = getAvailableLensSystems()[1];
   auto sequences = lensSystem.createReflectionSequences();
 
-  GLuint ssboReflectionEvents =
-      populateSSBO<ReflectionEvent, ReflectionEvent>(3, sequences);
+  GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent, ReflectionEvent>(3, sequences);
   GLuint ssboLensSystem = populateSSBO<Lens, Lens>(4, lensSystem.lenses);
 
   while (!glfwWindowShouldClose(window)) {

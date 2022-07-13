@@ -6,9 +6,7 @@ TEST_CASE("Lens::intersect") {
   SECTION("should intersect correctly with lens with positive radius") {
     auto testData = GENERATE(table<glm::vec3, glm::vec3, glm::vec3>(
         {{{0, 0, -1}, {0, 0, 2}, {0, 0, 1}},
-         {normalize(glm::vec3(0, 1, -1)),
-          {0, 1.0143f, 1.9857f},
-          {0, 0.0281799994f, 0.9996f}}}));
+         {normalize(glm::vec3(0, 1, -1)), {0, 1.0143f, 1.9857f}, {0, 0.0281799994f, 0.9996f}}}));
     glm::vec3 direction = std::get<0>(testData);
     glm::vec3 position = std::get<1>(testData);
     glm::vec3 normal = std::get<2>(testData);
@@ -28,8 +26,7 @@ TEST_CASE("Lens::intersect") {
 
   SECTION("should intersect correctly with lens with negative radius") {
     auto testData = GENERATE(table<glm::vec3, glm::vec3>(
-        {{{0, 0, -1}, {0, 0, 2}},
-         {normalize(glm::vec3(0, 1, -1)), {0, 0.98648f, 2.01352f}}}));
+        {{{0, 0, -1}, {0, 0, 2}}, {normalize(glm::vec3(0, 1, -1)), {0, 0.98648f, 2.01352f}}}));
     glm::vec3 direction = std::get<0>(testData);
     glm::vec3 position = std::get<1>(testData);
 
@@ -45,9 +42,9 @@ TEST_CASE("Lens::intersect") {
 
 TEST_CASE("LensSystem::()") {
   SECTION("should calculate lens centers correctly") {
-    LensSystem lensSystem("test", {{{40.93, 10.64, 1, 17.3},
-                                    {183.92, 7.05, 1.6910, 16.5},
-                                    {-48.91, 79.831, 1, 16.5}}});
+    LensSystem lensSystem(
+        "test",
+        {{{40.93, 10.64, 1, 17.3}, {183.92, 7.05, 1.6910, 16.5}, {-48.91, 79.831, 1, 16.5}}});
 
     REQUIRE(lensSystem.lenses[0].center == Catch::Approx(97.521));
     REQUIRE(lensSystem.lenses[1].center == Catch::Approx(86.8810043));
@@ -57,14 +54,13 @@ TEST_CASE("LensSystem::()") {
 
 TEST_CASE("LensSystem::createIdealInteractionSequence") {
   SECTION("should create an ideal interaction sequence") {
-    LensSystem lensSystem("test", {{{40.93, 10.64, 1, 17.3},
-                                    {183.92, 7.05, 1.6910, 16.5},
-                                    {-48.91, 79.831, 1, 16.5}}});
+    LensSystem lensSystem(
+        "test",
+        {{{40.93, 10.64, 1, 17.3}, {183.92, 7.05, 1.6910, 16.5}, {-48.91, 79.831, 1, 16.5}}});
 
     auto sequence = lensSystem.createIdealInteractionSequence();
 
-    REQUIRE(sequence ==
-            std::vector<InteractionEvent>({{0, true}, {1, true}, {2, true}}));
+    REQUIRE(sequence == std::vector<InteractionEvent>({{0, true}, {1, true}, {2, true}}));
   }
 }
 
@@ -73,8 +69,7 @@ TEST_CASE("LensSystem::traceToFilmPlane") {
     LensSystem lensSystem = getAvailableLensSystems()[3];
     auto sequence = lensSystem.createIdealInteractionSequence();
 
-    auto positionOnFilm =
-        lensSystem.traceToFilmPlane(sequence, {0, 0, 190}, {0, 0, -1});
+    auto positionOnFilm = lensSystem.traceToFilmPlane(sequence, {0, 0, 190}, {0, 0, -1});
 
     REQUIRE(positionOnFilm == glm::vec3(0, 0, 0));
   }

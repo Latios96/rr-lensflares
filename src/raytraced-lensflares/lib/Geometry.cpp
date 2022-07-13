@@ -10,16 +10,14 @@ void readObj(std::string objPath, Mesh &mesh) {
 
   std::string err;
 
-  bool success =
-      tinyobj::LoadObj(&attrib, &shapes, &materials, &err, objPath.data());
+  bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, objPath.data());
   if (!success) {
     spdlog::error("Error when reading obj file: {}", err);
     return;
   }
 
   for (int i = 0; i < attrib.vertices.size(); i = i + 3) {
-    mesh.vertices.push_back(
-        {{attrib.vertices[i], attrib.vertices[i + 1], attrib.vertices[i + 2]}});
+    mesh.vertices.push_back({{attrib.vertices[i], attrib.vertices[i + 1], attrib.vertices[i + 2]}});
   }
   for (auto &shape : shapes) {
     for (auto &indice : shape.mesh.indices) {

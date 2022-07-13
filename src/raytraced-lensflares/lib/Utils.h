@@ -3,6 +3,7 @@
 
 #include <spdlog/spdlog.h>
 #include <string>
+
 class Utils {
 public:
   template <typename T> static void logAndThrow(const std::string &message) {
