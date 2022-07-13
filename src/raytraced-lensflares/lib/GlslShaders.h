@@ -19,7 +19,6 @@ public:
 
 private:
   static std::string loadShaderFile(const std::string &filename);
-  static std::filesystem::path getExecutableDirectory();
   static GLuint compileShader(const char *shaderCode, GLenum shaderType);
 };
 
