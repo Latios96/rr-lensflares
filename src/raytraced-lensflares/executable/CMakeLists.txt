@@ -4,6 +4,7 @@ add_executable(raytraced-lensflares
 target_link_libraries(raytraced-lensflares
         PUBLIC
         imgui
+        raytraced-lensflares-lib
         ${CONAN_LIBS}
         ${CMAKE_DL_LIBS}
         )
