@@ -1,4 +1,5 @@
 #include "GlslShaders.h"
+#include "Resources.h"
 
 GLuint GlslShaders::loadVertexShader() {
   static std::string vertexShaderCode = loadShaderFile("vertex.glsl");
@@ -13,7 +14,7 @@ GLuint GlslShaders::loadFragmentShader() {
 std::string GlslShaders::loadShaderFile(const std::string &filename) {
   std::filesystem::path executableDirectory = Utils::getExecutableDirectory();
 
-  const std::filesystem::path filePath = executableDirectory / "shader" / filename;
+  const std::filesystem::path filePath = Resources::getShaderResourceByName(filename);
 
   if (!std::filesystem::exists(filePath)) {
     Utils::logAndThrow<std::runtime_error>(

@@ -8,6 +8,8 @@ add_library(raytraced-lensflares-lib
         GlslShaders.h
         Utils.cpp
         Utils.h
+        Resources.cpp
+        Resources.h
         )
 
 target_link_libraries(raytraced-lensflares-lib ${CONAN_LIBS} ${CMAKE_DL_LIBS})
