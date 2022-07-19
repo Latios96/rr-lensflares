@@ -23,3 +23,4 @@ add_custom_target(copy-meshes ALL
         ${CMAKE_BINARY_DIR}/bin/meshes
         )
 add_dependencies(raytraced-lensflares copy-meshes)
+install(TARGETS raytraced-lensflares DESTINATION bin)
