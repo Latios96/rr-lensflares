@@ -136,6 +136,8 @@ int main() {
   GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent, ReflectionEvent>(3, sequences);
   GLuint ssboLensSystem = populateSSBO<Lens, Lens>(4, lensSystem.lenses);
 
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
   while (!glfwWindowShouldClose(window)) {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
