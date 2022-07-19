@@ -1,5 +1,6 @@
 add_executable(raytraced-lensflares
         main.cpp
+        UiControls.h
         )
 target_link_libraries(raytraced-lensflares
         PUBLIC

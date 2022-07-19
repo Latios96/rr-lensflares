@@ -20,6 +20,7 @@
 #include "LensSystem.h"
 #include "LensSystems.h"
 #include "Resources.h"
+#include "UiControls.h"
 
 static void errorCallback(int error, const char *description) {
   std::cerr << fmt::format("Error: {}", description) << std::endl;
@@ -81,6 +82,17 @@ int main() {
   glfwMakeContextCurrent(window);
   gladLoadGL();
   glfwSwapInterval(1);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+
+  ImGui::StyleColorsDark();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init("#version 130");
 
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, nullptr);
@@ -146,6 +158,8 @@ int main() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+
+    renderUiControls();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
