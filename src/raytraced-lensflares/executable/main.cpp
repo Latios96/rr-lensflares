@@ -60,6 +60,10 @@ GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
   return ssbo;
 }
 
+template <typename T> GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
+  return populateSSBO<T, T>(ssboBindingLocation, source);
+}
+
 int main() {
   auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(errorCallback);
@@ -133,8 +137,8 @@ int main() {
   LensSystem lensSystem = getAvailableLensSystems()[1];
   auto sequences = lensSystem.createReflectionSequences();
 
-  GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent, ReflectionEvent>(3, sequences);
-  GLuint ssboLensSystem = populateSSBO<Lens, Lens>(4, lensSystem.lenses);
+  GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent>(3, sequences);
+  GLuint ssboLensSystem = populateSSBO<Lens>(4, lensSystem.lenses);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
