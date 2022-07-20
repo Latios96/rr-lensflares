@@ -1,12 +1,13 @@
 #version 460
 
 uniform mat4 MVP;
+uniform int sequenceIndex;
 in vec3 vCol;
 in vec3 vPos;
 
-layout(std430, binding = 3) buffer reflectionSequences
+layout(std430, binding = 3) buffer sequences
 {
-    ivec2 indices[];
+    ivec2 reflectionSequences[];
 };
 
 struct Lens{
@@ -57,23 +58,49 @@ vec3 refract(inout Intersection intersection, vec3 direction, float iorIn, float
     return k < 0 ? vec3(0, 0, 0) : eta * direction + (eta * cosi - sqrt(k)) * n;
 }
 
+vec3 reflect(inout Intersection intersection, vec3 direction){
+    return direction - 2.0f * dot(direction, intersection.normal) * intersection.normal;
+}
+
+float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, float ior){
+    if (lens.ior == 0) {
+        return 0;
+    }
+    Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
+    tracedPosition = intersection.position;
+
+    tracedDirection = refract(intersection, tracedDirection, ior, lens.ior);
+    return lens.ior;
+}
+
 void main(){
     const float startDistance = 200;
 
     vec3 tracedPosition = vPos * 15 + vec3(0.0, 0.0, 200.0);
     vec3 tracedDirection = vec3(0, 0, -1);
-    float ior =1;
-    for (int i=0;i< lenses.length();i++){
-        Lens lens = lenses[i];
-        if (lens.ior == 0) {
-            continue;
-        }
-        Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
-        tracedPosition = intersection.position;
+    float ior = 1;
 
-        tracedDirection = refract(intersection, tracedDirection, ior, lens.ior);
-        ior = lens.ior;
+    int firstReflectionIndex = reflectionSequences[sequenceIndex][0];
+    int secondReflectionIndex = reflectionSequences[sequenceIndex][1];
+
+    for (int i=0;i < firstReflectionIndex; i++){
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
     }
+
+    Intersection intersection = intersectLens(lenses[firstReflectionIndex], tracedPosition, tracedDirection);
+    tracedDirection = reflect(intersection, tracedDirection);
+
+    for (int i=firstReflectionIndex;i > secondReflectionIndex; i--){
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
+    }
+
+    intersection = intersectLens(lenses[secondReflectionIndex], tracedPosition, tracedDirection);
+    tracedDirection = reflect(intersection, tracedDirection);
+
+    for (int i=secondReflectionIndex;i < lenses.length();i++){
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
+    }
+
     float t = (-tracedPosition.z) / tracedDirection.z;
     vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 

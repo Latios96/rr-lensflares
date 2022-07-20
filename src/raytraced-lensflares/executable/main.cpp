@@ -126,6 +126,7 @@ int main() {
   glLinkProgram(program);
 
   const GLint mvp_location = glGetUniformLocation(program, "MVP");
+  const GLint sequenceIndexLocation = glGetUniformLocation(program, "sequenceIndex");
   const GLint vpos_location = glGetAttribLocation(program, "vPos");
 
   GLuint vertex_array;
@@ -162,6 +163,7 @@ int main() {
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
+    glUniform1i(sequenceIndexLocation, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
