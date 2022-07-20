@@ -43,7 +43,7 @@ TEST_CASE("Lens::intersect") {
 TEST_CASE("LensSystem::()") {
   SECTION("should calculate lens centers correctly") {
     LensSystem lensSystem(
-        "test",
+        "test", 0,
         {{{40.93, 10.64, 1, 17.3}, {183.92, 7.05, 1.6910, 16.5}, {-48.91, 79.831, 1, 16.5}}});
 
     REQUIRE(lensSystem.lenses[0].center == Catch::Approx(97.521));
@@ -55,7 +55,7 @@ TEST_CASE("LensSystem::()") {
 TEST_CASE("LensSystem::createIdealInteractionSequence") {
   SECTION("should create an ideal interaction sequence") {
     LensSystem lensSystem(
-        "test",
+        "test", 0,
         {{{40.93, 10.64, 1, 17.3}, {183.92, 7.05, 1.6910, 16.5}, {-48.91, 79.831, 1, 16.5}}});
 
     auto sequence = lensSystem.createIdealInteractionSequence();

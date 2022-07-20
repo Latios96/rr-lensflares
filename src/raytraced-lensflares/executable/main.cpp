@@ -154,15 +154,10 @@ int main() {
     glm::mat4x4 p(1.0);
     glm::mat4x4 mvp(1.0);
 
-    const float filmbackSize = 36;
-    const float focalLength = 100; // todo move to lens system
-    const float fov = 2 * std::atan(filmbackSize / 2.0f * 1.0f / focalLength);
-    const float focalPointDistance = std::atan(fov) * (filmbackSize / 2.0f);
-
-    const glm::mat4x4 view =
-        glm::lookAt(glm::vec3(0, 0, -focalPointDistance), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    const glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, -lensSystem.focusPointDistance()),
+                                         glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    p = glm::perspective(fov, aspectRatio, 0.0f, 300.0f) * view;
+    p = glm::perspective(lensSystem.getFov(36), aspectRatio, 0.0f, 300.0f) * view;
     mvp = p * m;
 
     glUseProgram(program);

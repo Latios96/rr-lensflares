@@ -1,8 +1,9 @@
 #include "LensSystem.h"
 #include <fmt/format.h>
 
-LensSystem::LensSystem(const std::string &name, const std::vector<LensData> &lensesData)
-    : name(name) {
+LensSystem::LensSystem(const std::string &name, float focalLength,
+                       const std::vector<LensData> &lensesData)
+    : name(name), focalLength(focalLength) {
   float center = 0;
   for (int i = lensesData.size() - 1; i >= 0; i--) {
     center += lensesData[i].thickness;
@@ -67,6 +68,16 @@ glm::vec3 LensSystem::traceToFilmPlane(const std::vector<InteractionEvent> &even
   }
   float t = (-tracedPosition.z) / tracedDirection.z;
   return tracedPosition + tracedDirection * t;
+}
+
+float LensSystem::focusPointDistance() {
+  const float filmbackSize = 36;
+  const float fov = getFov(filmbackSize);
+  return std::atan(fov) * (filmbackSize / 2.0f);
+}
+
+float LensSystem::getFov(const float filmbackSize) const {
+  return 2 * atan(filmbackSize / 2.0f * 1.0f / focalLength);
 }
 
 LensData::LensData(float curvatureRadius, float thickness, float ior, float apertureRadius)

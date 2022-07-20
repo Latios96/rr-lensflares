@@ -74,7 +74,8 @@ struct ReflectionEvent {
 struct LensSystem {
   std::string name;
   std::vector<Lens> lenses;
-  LensSystem(const std::string &name, const std::vector<LensData> &lensesData);
+  float focalLength;
+  LensSystem(const std::string &name, float focalLength, const std::vector<LensData> &lensesData);
   Intersection traceRay(const glm::vec3 &position, const glm::vec3 &direction);
 
   std::vector<InteractionEvent> createIdealInteractionSequence() const;
@@ -82,6 +83,9 @@ struct LensSystem {
 
   glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events, const glm::vec3 &position,
                              const glm::vec3 &direction) const;
+
+  float focusPointDistance();
+  float getFov(const float filmbackSize) const;
 };
 
 #endif // RR_LENSFLARES_SRC_LENSSYSTEM_H_

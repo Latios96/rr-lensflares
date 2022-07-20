@@ -7,11 +7,13 @@
 std::vector<LensSystem> getAvailableLensSystems() {
   return {
       {"# single bi-convex lens, Ø1, N-BK7, FL 50mm",
+       50.f,
        {
            {50.6, 5.2, 1.517, 12.7},
            {-50.6, 48.2, 1, 12.7},
        }},
       {"# Brendel Tessar, USP 2854889, 100mm F/2.8",
+       100.f,
        {
            {-115.33, 2.1, 1.5486, 19.2},
            {306.84, 4.16, 1, 19.2},
@@ -22,6 +24,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-48.91, 79.831, 1, 16.5},
        }},
       {"# CANON, US Patent 5537259, F/2.8, 70-200mm (135)",
+       135.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
            {79.501, 5.72, 1.497, 35.0},  {203.191, 26.15, 1, 35.0},     {54.391, 2.2, 1.847, 28.0},
@@ -36,6 +39,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
       {"# CANON, US Patent 5537259, F/2.8, 70-200mm (200)",
+       200.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
            {79.501, 5.72, 1.497, 35.0},  {203.191, 32.85, 1, 35.0},     {54.391, 2.2, 1.847, 28.0},
@@ -50,6 +54,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
       {"# CANON, US Patent 5537259, F/2.8, 70-200mm (70)",
+       70.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
            {79.501, 5.72, 1.497, 35.0},  {203.191, 8.78, 1, 35.0},      {54.391, 2.2, 1.847, 28.0},
@@ -64,6 +69,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
       {"# Angenieux, US Patent 2701982; f/1.1, 100mm",
+       100.f,
        {
            {559.28, 0.23, 1, 54.0},
            {100.12, 11.45, 1.67, 51.0},
@@ -81,6 +87,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-203.54, 55.742, 1, 35.0},
        }},
       {"# US patent 3376090",
+       50.f,
        {
            {83.45, 0.14, 1, 20.0},
            {29.71, 6.29, 1.7506, 15.0},
@@ -93,6 +100,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-59.45, 71.0, 1, 20.0},
        }},
       {"# double gauss f/2.5, Lens Design, Milton Laikin, 1992, Page 75",
+       50.f,
        {
            {351.08642, 0.5842, 1, 40.64},
            {49.8475, 15.367, 1.6204, 32.512},
@@ -106,6 +114,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-225.93554, 70.6628, 1, 38.1},
        }},
       {"# double gauss, Modern Lens Design, Warren J. Smith, 1992, Page 312",
+       50.f,
        {
            {169.66, 0.24, 1, 50.4},
            {38.55, 8.05, 1.67, 46.0},
@@ -119,6 +128,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-79.46, 72.228, 1, 40.0},
        }},
       {"# fisheye 220 degree (shimizu)",
+       50.f,
        {
            {52.5, 28.0, 1, 52.3},       {76.4, 3.8, 1.51680, 50.0},   {31.521, 21.8, 1, 30.5},
            {150.0, 3.0, 1.51680, 27.0}, {17.1, 16.5, 1, 16.5},        {-60.0, 7.0, 1.62041, 16.5},
@@ -131,6 +141,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
        }},
       {"# wide angle zoom lens, Inventor: Takayuki Itoh, US Patent 4196968, "
        "100-145mm",
+       100.f,
        {
            {914.140, 0.410, 1, 82.0},
            {187.780, 4.880, 1.806, 75.0},
@@ -153,6 +164,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
        }},
       {"# wide angle zoom lens, Inventor: Takayuki Itoh, US Patent 4196968, "
        "100-145mm",
+       100.f,
        {
            {914.140, 0.410, 1, 82.0},
            {187.780, 4.880, 1.806, 75.0},
@@ -175,6 +187,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
        }},
       {"# wide angle zoom lens, Inventor: Takayuki Itoh, US Patent 4196968, "
        "100-145mm",
+       100.f,
        {
            {914.140, 0.410, 1, 82.0},
            {187.780, 4.880, 1.806, 75.0},
@@ -197,12 +210,14 @@ std::vector<LensSystem> getAvailableLensSystems() {
        }},
       {"# achromatic double crown/flint (#NT32-921) edmund optics archomat, "
        "~129mm",
+       129.f,
        {
            {-62.03, 4.20, 1.5, 24.0},
            {-1240.67, 5.00, 1, 24.0},
            {0, 105.00, 0, 20.0},
        }},
       {"# Nikon, PAT S.53-131852, F/2.8, 80-200mm (140)",
+       140.f,
        {
            {-479.279, 0.357, 1, 32.2},
            {192.855, 6.286, 1.589, 31.0},
@@ -227,6 +242,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-466.815, 40.08, 1, 12.6},
        }},
       {"# Nikon, PAT S.53-131852, F/2.8, 80-200mm (200)",
+       200.f,
        {
            {-479.279, 0.357, 1, 32.2},
            {192.855, 6.286, 1.589, 31.0},
@@ -251,6 +267,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-466.815, 40.08, 1, 12.6},
        }},
       {"# Nikon, PAT S.53-131852, F/2.8, 80-200mm (80)",
+       80.f,
        {
            {-479.279, 0.357, 1, 32.2},
            {192.855, 6.286, 1.589, 31.0},
@@ -275,6 +292,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-466.815, 40.08, 1, 12.6},
        }},
       {"# petzval-type photographic objective US2500046A (1948), scale 50%",
+       50.f,
        {
            {-56.79, 4.5, 1.617, 23.0},
            {0, 24.0, 1, 23.0},
@@ -285,6 +303,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-282.05, 56.5, 1, 15.0},
        }},
       {"# US Patent 4310222 wide angle",
+       50.f,
        {
            {24.997, 12.41, 1, 20.0},
            {58.28, 5.02, 1.6031, 15.0},
