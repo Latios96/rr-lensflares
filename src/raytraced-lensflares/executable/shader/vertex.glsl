@@ -77,5 +77,5 @@ void main(){
     float t = (-tracedPosition.z) / tracedDirection.z;
     vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 
-    gl_Position = vec4(positionOnPlane, 1);
+    gl_Position = MVP * vec4(positionOnPlane, 1);
 }

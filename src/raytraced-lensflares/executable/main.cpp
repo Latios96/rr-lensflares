@@ -5,6 +5,7 @@
 
 #include <fmt/format.h>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
@@ -145,7 +146,6 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    const float ratio = width / (float)height;
 
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -153,7 +153,16 @@ int main() {
     glm::mat4x4 m(1.0);
     glm::mat4x4 p(1.0);
     glm::mat4x4 mvp(1.0);
-    p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+
+    const float filmbackSize = 36;
+    const float focalLength = 100; // todo move to lens system
+    const float fov = 2 * std::atan(filmbackSize / 2.0f * 1.0f / focalLength);
+    const float focalPointDistance = std::atan(fov) * (filmbackSize / 2.0f);
+
+    const glm::mat4x4 view =
+        glm::lookAt(glm::vec3(0, 0, -focalPointDistance), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    p = glm::perspective(fov, aspectRatio, 0.0f, 300.0f) * view;
     mvp = p * m;
 
     glUseProgram(program);
