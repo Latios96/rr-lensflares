@@ -47,16 +47,36 @@ void toAlignedVector(const std::vector<A> &source, std::vector<B> &target) {
 }
 
 template <typename T, typename A>
-GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
+GLuint updateSSBO(GLuint ssbo, int ssboBindingLocation, const std::vector<T> &source) {
   std::vector<A> aligned;
   toAlignedVector(source, aligned);
 
-  GLuint ssbo;
-  glGenBuffers(1, &ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
   glBufferData(GL_SHADER_STORAGE_BUFFER, aligned.size() * sizeof(A), aligned.data(),
                GL_STATIC_DRAW);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssboBindingLocation, ssbo);
+
+  return ssbo;
+}
+
+template <typename T>
+GLuint updateSSBO(GLuint ssbo, int ssboBindingLocation, const std::vector<T> &source) {
+  std::vector<T> aligned;
+  toAlignedVector(source, aligned);
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, aligned.size() * sizeof(T), aligned.data(),
+               GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, ssboBindingLocation, ssbo);
+
+  return ssbo;
+}
+
+template <typename T, typename A>
+GLuint populateSSBO(int ssboBindingLocation, const std::vector<T> &source) {
+  GLuint ssbo;
+  glGenBuffers(1, &ssbo);
+  updateSSBO<T, A>(ssbo, ssboBindingLocation, source);
 
   return ssbo;
 }
@@ -136,15 +156,28 @@ int main() {
   glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, pos));
 
-  LensSystem lensSystem = getAvailableLensSystems()[1];
+  static UiState uiState;
+  static UiState previousState = uiState;
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  auto availableLensSystems = getAvailableLensSystems();
+
+  LensSystem lensSystem = availableLensSystems[uiState.currentLensIndex];
   auto sequences = lensSystem.createReflectionSequences();
 
   GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent>(3, sequences);
   GLuint ssboLensSystem = populateSSBO<Lens>(4, lensSystem.lenses);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
   while (!glfwWindowShouldClose(window)) {
+    if (uiState.currentLensIndex != previousState.currentLensIndex) {
+      lensSystem = availableLensSystems[uiState.currentLensIndex];
+      sequences = lensSystem.createReflectionSequences();
+
+      updateSSBO<ReflectionEvent>(ssboReflectionEvents, 3, sequences);
+      updateSSBO<Lens>(ssboLensSystem, 4, lensSystem.lenses);
+    }
+    previousState = uiState;
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
 
@@ -163,7 +196,7 @@ int main() {
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
-    glUniform1i(sequenceIndexLocation, 0);
+    glUniform1i(sequenceIndexLocation, uiState.sequenceIndex);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
@@ -171,7 +204,7 @@ int main() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
 
-    renderUiControls();
+    renderUiControls(uiState, availableLensSystems, sequences);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

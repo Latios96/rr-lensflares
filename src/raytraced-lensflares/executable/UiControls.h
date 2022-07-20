@@ -5,7 +5,13 @@
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 
-void renderUiControls() {
+struct UiState {
+  int sequenceIndex;
+  int currentLensIndex;
+};
+
+void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
+                      const std::vector<ReflectionEvent> &sequences) {
   // Poll and handle events (inputs, window resize, etc.)
   // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants
   // to use your inputs.
@@ -24,13 +30,15 @@ void renderUiControls() {
   // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named
   // window.
   {
-    static float f = 0.0f;
-    static int counter = 0;
 
-    ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Controls"); // Create a window called "Hello, world!" and append into it.
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
+
+    ImGui::SliderInt("Reflection Sequence Index", &uiState.sequenceIndex, 0, sequences.size() - 1);
+    ImGui::SliderInt("Lens", &uiState.currentLensIndex, 0, availableLensSystems.size() - 1);
+
     ImGui::End();
   }
 
