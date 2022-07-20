@@ -37,7 +37,19 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
                 ImGui::GetIO().Framerate);
 
     ImGui::SliderInt("Reflection Sequence Index", &uiState.sequenceIndex, 0, sequences.size() - 1);
-    ImGui::SliderInt("Lens", &uiState.currentLensIndex, 0, availableLensSystems.size() - 1);
+
+    const char *combo_preview_value = availableLensSystems[uiState.currentLensIndex].name.c_str();
+    if (ImGui::BeginCombo("Lenses", combo_preview_value)) {
+      for (int n = 0; n < availableLensSystems.size(); n++) {
+        const bool is_selected = (uiState.currentLensIndex == n);
+        if (ImGui::Selectable(availableLensSystems[n].name.c_str(), is_selected))
+          uiState.currentLensIndex = n;
+
+        if (is_selected)
+          ImGui::SetItemDefaultFocus();
+      }
+      ImGui::EndCombo();
+    }
 
     ImGui::End();
   }
