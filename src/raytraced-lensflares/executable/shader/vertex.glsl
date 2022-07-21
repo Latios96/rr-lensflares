@@ -2,6 +2,7 @@
 
 uniform mat4 MVP;
 uniform int sequenceIndex;
+uniform vec3 lightDirection;
 in vec3 vPos;
 
 
@@ -84,8 +85,14 @@ float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, fl
 void main(){
     const float startDistance = 200;
 
-    vec3 tracedPosition = vPos * 15 + vec3(0.0, 0.0, 200.0);
-    vec3 tracedDirection = vec3(0, 0, -1);
+    mat4 gridMatrix = mat4(1);
+    gridMatrix[3][0] = lightDirection.x*200;
+    gridMatrix[3][1] = lightDirection.y*200;
+    gridMatrix[3][2] = lightDirection.z*200;
+
+    vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 15+ vec3(0.0, 0.0, 200.0), 1));
+    vec3 tracedDirection = lightDirection;
+
     float ior = 1;
     float maxRelativeDistanceToOpticalAxis = 0;
 

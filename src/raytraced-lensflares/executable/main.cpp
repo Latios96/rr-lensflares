@@ -85,6 +85,53 @@ template <typename T> GLuint populateSSBO(int ssboBindingLocation, const std::ve
   return populateSSBO<T, T>(ssboBindingLocation, source);
 }
 
+static UiState uiState;
+
+template <> struct fmt::formatter<glm::vec3> {
+  template <typename ParseContext> constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
+
+  template <typename FormatContext> auto format(glm::vec3 const &vec, FormatContext &ctx) {
+    return fmt::format_to(ctx.out(), "({},{},{})", vec.x, vec.y, vec.z);
+  };
+};
+
+template <> struct fmt::formatter<glm::vec2> {
+  template <typename ParseContext> constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
+
+  template <typename FormatContext> auto format(glm::vec2 const &vec, FormatContext &ctx) {
+    return fmt::format_to(ctx.out(), "({},{})", vec.x, vec.y);
+  };
+};
+
+static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos) {
+  if (!uiState.isMovingLight) {
+    return;
+  }
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  glm::vec2 relativePosition = glm::vec2(xpos / width, ypos / height);
+  glm::vec3 positionOnFilm =
+      glm::vec3(36.0f / 2 - 36 * relativePosition.x, 24.0f / 2 - 24 * relativePosition.y, 0);
+  uiState.lightPositionOnFilm = positionOnFilm;
+}
+
+static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+  const bool lightMoveStart = button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS;
+  const bool lightMoveEnd = button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE;
+
+  if (lightMoveStart) {
+    uiState.isMovingLight = true;
+  } else if (lightMoveEnd) {
+    uiState.isMovingLight = false;
+  }
+}
+
+static glm::ivec2 getInitialLightPositionOnScreen(GLFWwindow *window) {
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  return {width / 2, height / 2};
+}
+
 int main() {
   auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(errorCallback);
@@ -103,6 +150,8 @@ int main() {
   }
 
   glfwSetKeyCallback(window, key_callback);
+  glfwSetCursorPosCallback(window, cursorPositionCallback);
+  glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
   glfwMakeContextCurrent(window);
   gladLoadGL();
@@ -140,6 +189,7 @@ int main() {
   const GLuint program = GlslShaders::createProgramm();
 
   const GLint mvp_location = glGetUniformLocation(program, "MVP");
+  const GLint lightDirectionPosition = glGetUniformLocation(program, "lightDirection");
   const GLint sequenceIndexLocation = glGetUniformLocation(program, "sequenceIndex");
   const GLint vpos_location = glGetAttribLocation(program, "vPos");
 
@@ -150,7 +200,7 @@ int main() {
   glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, pos));
 
-  static UiState uiState;
+  uiState.lightPositionOnFilm = glm::vec3(0, 0, 0);
   static UiState previousState = uiState;
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -185,7 +235,7 @@ int main() {
     const glm::mat4x4 view = glm::lookAt(glm::vec3(0, 0, -lensSystem.focusPointDistance()),
                                          glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    p = glm::perspective(lensSystem.getFov(36), aspectRatio, 0.0f, 300.0f) * view;
+    p = glm::perspective(lensSystem.getFov(36), aspectRatio, 0.0f, 500.0f) * view;
     mvp = p * m;
 
     glUseProgram(program);
@@ -195,6 +245,10 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
+
+    glm::vec3 lightDirection = glm::normalize(uiState.lightPositionOnFilm -
+                                              glm::vec3(0, 0, -lensSystem.focusPointDistance()));
+    glUniform3fv(lightDirectionPosition, 1, &lightDirection[0]);
 
     for (int i = 0; i < sequences.size(); i++) {
       glUniform1i(sequenceIndexLocation, i);

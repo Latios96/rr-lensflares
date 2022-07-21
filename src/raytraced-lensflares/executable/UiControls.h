@@ -8,6 +8,8 @@
 struct UiState {
   int sequenceIndex;
   int currentLensIndex;
+  bool isMovingLight;
+  glm::vec3 lightPositionOnFilm;
 };
 
 void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
