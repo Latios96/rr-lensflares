@@ -15,6 +15,7 @@
 class GlslShaders {
 public:
   static GLuint loadVertexShader();
+  static GLuint loadGeometryShader();
   static GLuint loadFragmentShader();
   static GLuint createProgramm();
 

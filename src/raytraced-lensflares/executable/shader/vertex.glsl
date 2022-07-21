@@ -2,8 +2,11 @@
 
 uniform mat4 MVP;
 uniform int sequenceIndex;
-out vec3 color;
 in vec3 vPos;
+
+
+out vec3 vcColor;
+
 
 layout(std430, binding = 3) buffer sequences
 {
@@ -62,7 +65,7 @@ vec3 reflect(inout Intersection intersection, vec3 direction){
     return direction - 2.0f * dot(direction, intersection.normal) * intersection.normal;
 }
 
-float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, float ior){
+float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, float ior, inout float maxRelativeDistanceToOpticalAxis){
     if (lens.ior == 0) {
         return 0;
     }
@@ -70,6 +73,11 @@ float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, fl
     tracedPosition = intersection.position;
 
     tracedDirection = refract(intersection, tracedDirection, ior, lens.ior);
+
+    float distanceToOpticalAxis = length(vec2(intersection.position.x, intersection.position.y));
+    float relativeDistanceToOpticalAxis = distanceToOpticalAxis / lens.apertureRadius;
+    maxRelativeDistanceToOpticalAxis = max(maxRelativeDistanceToOpticalAxis, relativeDistanceToOpticalAxis);
+
     return lens.ior;
 }
 
@@ -79,31 +87,34 @@ void main(){
     vec3 tracedPosition = vPos * 15 + vec3(0.0, 0.0, 200.0);
     vec3 tracedDirection = vec3(0, 0, -1);
     float ior = 1;
+    float maxRelativeDistanceToOpticalAxis = 0;
 
     int firstReflectionIndex = reflectionSequences[sequenceIndex][0];
     int secondReflectionIndex = reflectionSequences[sequenceIndex][1];
 
     for (int i=0;i < firstReflectionIndex; i++){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
     }
 
     Intersection intersection = intersectLens(lenses[firstReflectionIndex], tracedPosition, tracedDirection);
     tracedDirection = reflect(intersection, tracedDirection);
 
     for (int i=firstReflectionIndex;i > secondReflectionIndex; i--){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
     }
 
     intersection = intersectLens(lenses[secondReflectionIndex], tracedPosition, tracedDirection);
     tracedDirection = reflect(intersection, tracedDirection);
 
     for (int i=secondReflectionIndex;i < lenses.length();i++){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
     }
 
     float t = (-tracedPosition.z) / tracedDirection.z;
     vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 
     gl_Position = MVP * vec4(positionOnPlane, 1);
-    color = vec3(0, 1, 0);
+    float rayLeft = maxRelativeDistanceToOpticalAxis > 1 ? 1:0;
+    float rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1:0;
+    vcColor = vec3(0, rayStayed, 0);
 }

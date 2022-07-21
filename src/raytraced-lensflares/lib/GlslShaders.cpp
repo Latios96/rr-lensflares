@@ -6,6 +6,11 @@ GLuint GlslShaders::loadVertexShader() {
   return compileShader(vertexShaderCode.c_str(), GL_VERTEX_SHADER);
 }
 
+GLuint GlslShaders::loadGeometryShader() {
+  static std::string geometryShaderCode = loadShaderFile("geometry.glsl");
+  return compileShader(geometryShaderCode.c_str(), GL_GEOMETRY_SHADER);
+}
+
 GLuint GlslShaders::loadFragmentShader() {
   static std::string vertexShaderCode = loadShaderFile("fragment.glsl");
   return compileShader(vertexShaderCode.c_str(), GL_FRAGMENT_SHADER);
@@ -43,9 +48,13 @@ GLuint GlslShaders::compileShader(const char *shaderCode, GLenum shaderType) {
 
     glDeleteShader(shader);
 
-    Utils::logAndThrow<std::runtime_error>(
-        fmt::format("Error when compiling {} shader: :\n{}",
-                    shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment", infoLog));
+    std::unordered_map<GLenum, std::string> shaderTypeMapping;
+    shaderTypeMapping[GL_VERTEX_SHADER] = "vertex";
+    shaderTypeMapping[GL_GEOMETRY_SHADER] = "geometry";
+    shaderTypeMapping[GL_FRAGMENT_SHADER] = "fragment";
+
+    Utils::logAndThrow<std::runtime_error>(fmt::format("Error when compiling {} shader: :\n{}",
+                                                       shaderTypeMapping[shaderType], infoLog));
   }
 
   return shader;
@@ -53,12 +62,16 @@ GLuint GlslShaders::compileShader(const char *shaderCode, GLenum shaderType) {
 
 GLuint GlslShaders::createProgramm() {
   const GLuint vertex_shader = GlslShaders::loadVertexShader();
+  const GLuint geometry_shader = GlslShaders::loadGeometryShader();
   const GLuint fragment_shader = GlslShaders::loadFragmentShader();
 
   const GLuint program = glCreateProgram();
   glAttachShader(program, vertex_shader);
+  glAttachShader(program, geometry_shader);
   glAttachShader(program, fragment_shader);
   glLinkProgram(program);
+
+  checkLinkError(program);
 
   return program;
 }
