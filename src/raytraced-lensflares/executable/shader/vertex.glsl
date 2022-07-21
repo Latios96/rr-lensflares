@@ -2,7 +2,7 @@
 
 uniform mat4 MVP;
 uniform int sequenceIndex;
-in vec3 vCol;
+out vec3 color;
 in vec3 vPos;
 
 layout(std430, binding = 3) buffer sequences
@@ -105,4 +105,5 @@ void main(){
     vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 
     gl_Position = MVP * vec4(positionOnPlane, 1);
+    color = vec3(0, 1, 0);
 }
