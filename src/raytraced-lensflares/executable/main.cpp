@@ -190,13 +190,16 @@ int main() {
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
-    glUniform1i(sequenceIndexLocation, uiState.sequenceIndex);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
-    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+
+    for (int i = 0; i < sequences.size(); i++) {
+      glUniform1i(sequenceIndexLocation, i);
+      glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+    }
 
     renderUiControls(uiState, availableLensSystems, sequences);
 
