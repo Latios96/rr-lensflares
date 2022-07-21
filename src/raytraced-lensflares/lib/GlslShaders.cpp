@@ -50,3 +50,34 @@ GLuint GlslShaders::compileShader(const char *shaderCode, GLenum shaderType) {
 
   return shader;
 }
+
+GLuint GlslShaders::createProgramm() {
+  const GLuint vertex_shader = GlslShaders::loadVertexShader();
+  const GLuint fragment_shader = GlslShaders::loadFragmentShader();
+
+  const GLuint program = glCreateProgram();
+  glAttachShader(program, vertex_shader);
+  glAttachShader(program, fragment_shader);
+  glLinkProgram(program);
+
+  return program;
+}
+
+void GlslShaders::checkLinkError(GLuint program) {
+  GLint isLinked = 0;
+  glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
+  if (isLinked == GL_FALSE) {
+    GLint maxLength = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+    // The maxLength includes the NULL character
+    std::vector<GLchar> infoLog(maxLength);
+    glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+
+    // The program is useless now. So delete it.
+    glDeleteProgram(program);
+
+    Utils::logAndThrow<std::runtime_error>(
+        fmt::format("Error when linking programm: :\n{}", infoLog.data()));
+  }
+}

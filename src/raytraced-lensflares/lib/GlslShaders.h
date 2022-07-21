@@ -16,10 +16,12 @@ class GlslShaders {
 public:
   static GLuint loadVertexShader();
   static GLuint loadFragmentShader();
+  static GLuint createProgramm();
 
 private:
   static std::string loadShaderFile(const std::string &filename);
   static GLuint compileShader(const char *shaderCode, GLenum shaderType);
+  static void checkLinkError(GLuint program);
 };
 
 #endif // RR_LENSFLARES_SRC_RAYTRACED_LENSFLARES_LIB_GLSLSHADERS_H_

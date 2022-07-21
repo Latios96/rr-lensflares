@@ -137,13 +137,7 @@ int main() {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int),
                mesh.indices.data(), GL_STATIC_DRAW);
 
-  const GLuint vertex_shader = GlslShaders::loadVertexShader();
-  const GLuint fragment_shader = GlslShaders::loadFragmentShader();
-
-  const GLuint program = glCreateProgram();
-  glAttachShader(program, vertex_shader);
-  glAttachShader(program, fragment_shader);
-  glLinkProgram(program);
+  const GLuint program = GlslShaders::createProgramm();
 
   const GLint mvp_location = glGetUniformLocation(program, "MVP");
   const GLint sequenceIndexLocation = glGetUniformLocation(program, "sequenceIndex");
