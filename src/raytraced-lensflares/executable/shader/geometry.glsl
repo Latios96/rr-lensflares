@@ -20,7 +20,6 @@ void main()
         gl_Position = gl_in[i].gl_Position;
         intensity = originalArea/calculatedArea;
         gColor = vcColor[i] * intensity;
-        //color = vec3(1,0,0);
         EmitVertex();
     }
 }
