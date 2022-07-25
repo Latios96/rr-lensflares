@@ -90,7 +90,7 @@ void main(){
     gridMatrix[3][1] = lightDirection.y*200;
     gridMatrix[3][2] = lightDirection.z*200;
 
-    vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 15+ vec3(0.0, 0.0, 200.0), 1));
+    vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 5+ vec3(0.0, 0.0, 200.0), 1));
     vec3 tracedDirection = lightDirection;
 
     float ior = 1;

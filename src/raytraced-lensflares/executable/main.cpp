@@ -18,6 +18,7 @@
 
 #include "Geometry.h"
 #include "GlslShaders.h"
+#include "GridGenerator.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
 #include "Mesh.h"
@@ -174,6 +175,10 @@ int main() {
 
   Mesh mesh;
   readObj(Resources::getMeshResourceByName("grid.obj").string(), mesh);
+  GridGenerator gridGenerator;
+  Mesh grid;
+  gridGenerator.generateGrid(grid, 20);
+  mesh = grid;
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
