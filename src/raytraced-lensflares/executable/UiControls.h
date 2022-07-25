@@ -7,7 +7,7 @@
 
 struct UiState {
   int sequenceIndex;
-  int currentLensIndex;
+  int currentLensIndex = 4;
   bool isMovingLight;
   glm::vec3 lightPositionOnFilm;
 };
