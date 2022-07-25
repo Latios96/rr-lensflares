@@ -173,6 +173,9 @@ int main() {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, nullptr);
 
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+
   Mesh mesh;
   readObj(Resources::getMeshResourceByName("grid.obj").string(), mesh);
   GridGenerator gridGenerator;
