@@ -20,6 +20,7 @@
 #include "GlslShaders.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
+#include "Mesh.h"
 #include "Resources.h"
 #include "UiControls.h"
 

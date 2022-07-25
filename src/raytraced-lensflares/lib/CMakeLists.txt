@@ -10,6 +10,7 @@ add_library(raytraced-lensflares-lib
         Utils.h
         Resources.cpp
         Resources.h
+        Mesh.h
         )
 
 target_link_libraries(raytraced-lensflares-lib ${CONAN_LIBS} ${CMAKE_DL_LIBS})

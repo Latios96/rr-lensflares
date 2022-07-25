@@ -1,6 +1,7 @@
 #include "Geometry.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
+#include "Mesh.h"
 #include "tiny_obj_loader.h"
 
 void readObj(std::string objPath, Mesh &mesh) {
