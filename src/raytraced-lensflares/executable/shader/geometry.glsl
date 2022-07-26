@@ -5,6 +5,7 @@ layout(triangle_strip) out;
 layout(max_vertices=3) out;
 
 in vec3 vcColor[];
+in vec2 vAperturePos[];
 
 out vec3 gColor;
 out float intensity;
@@ -19,7 +20,7 @@ void main()
     for (int i = 0; i < 3; i++) {
         gl_Position = gl_in[i].gl_Position;
         intensity = originalArea/calculatedArea;
-        gColor = vcColor[i] * intensity;
+        gColor = vec3(vAperturePos[i].x, vAperturePos[i].y, 0)* vcColor[i].g * intensity;
         EmitVertex();
     }
 }

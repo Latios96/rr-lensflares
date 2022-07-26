@@ -7,6 +7,7 @@ in vec3 vPos;
 
 
 out vec3 vcColor;
+out vec2 vAperturePos;
 
 
 layout(std430, binding = 3) buffer sequences
@@ -66,11 +67,19 @@ vec3 reflect(inout Intersection intersection, vec3 direction){
     return direction - 2.0f * dot(direction, intersection.normal) * intersection.normal;
 }
 
-float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, float ior, inout float maxRelativeDistanceToOpticalAxis){
+vec2 intersectAperture(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection){
+    vec3 pos = tracedPosition + tracedDirection * (lens.center - tracedPosition.z);
+    return pos.xy;
+}
+
+float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, float ior, inout float maxRelativeDistanceToOpticalAxis, inout vec2 aperturePos){
+    Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
     if (lens.ior == 0) {
+        vec2 pos = intersectAperture(lens, tracedPosition, tracedDirection);
+        aperturePos = (pos.xy/lens.apertureRadius)*0.5+1;
         return 0;
     }
-    Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
+
     tracedPosition = intersection.position;
 
     tracedDirection = refract(intersection, tracedDirection, ior, lens.ior);
@@ -90,6 +99,7 @@ void main(){
     gridMatrix[3][1] = lightDirection.y*200;
     gridMatrix[3][2] = lightDirection.z*200;
 
+    vec2 aperturePos=vec2(0, 0);
     vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 5+ vec3(0.0, 0.0, 200.0), 1));
     vec3 tracedDirection = lightDirection;
 
@@ -100,21 +110,21 @@ void main(){
     int secondReflectionIndex = reflectionSequences[sequenceIndex][1];
 
     for (int i=0;i < firstReflectionIndex; i++){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis, aperturePos);
     }
 
     Intersection intersection = intersectLens(lenses[firstReflectionIndex], tracedPosition, tracedDirection);
     tracedDirection = reflect(intersection, tracedDirection);
 
     for (int i=firstReflectionIndex;i > secondReflectionIndex; i--){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis, aperturePos);
     }
 
     intersection = intersectLens(lenses[secondReflectionIndex], tracedPosition, tracedDirection);
     tracedDirection = reflect(intersection, tracedDirection);
 
     for (int i=secondReflectionIndex;i < lenses.length();i++){
-        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis);
+        ior = trace(lenses[i], tracedPosition, tracedDirection, ior, maxRelativeDistanceToOpticalAxis, aperturePos);
     }
 
     float t = (-tracedPosition.z) / tracedDirection.z;
@@ -124,4 +134,5 @@ void main(){
     float rayLeft = maxRelativeDistanceToOpticalAxis > 1 ? 1:0;
     float rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1:0;
     vcColor = vec3(0, rayStayed, 0);
+    vAperturePos = aperturePos;
 }
