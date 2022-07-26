@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "Geometry.h"
+#include "GlmUtils.h"
 #include "GlslShaders.h"
 #include "GridGenerator.h"
 #include "LensSystem.h"
@@ -88,22 +89,6 @@ template <typename T> GLuint populateSSBO(int ssboBindingLocation, const std::ve
 }
 
 static UiState uiState;
-
-template <> struct fmt::formatter<glm::vec3> {
-  template <typename ParseContext> constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
-
-  template <typename FormatContext> auto format(glm::vec3 const &vec, FormatContext &ctx) {
-    return fmt::format_to(ctx.out(), "({},{},{})", vec.x, vec.y, vec.z);
-  };
-};
-
-template <> struct fmt::formatter<glm::vec2> {
-  template <typename ParseContext> constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
-
-  template <typename FormatContext> auto format(glm::vec2 const &vec, FormatContext &ctx) {
-    return fmt::format_to(ctx.out(), "({},{})", vec.x, vec.y);
-  };
-};
 
 static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos) {
   if (!uiState.isMovingLight) {

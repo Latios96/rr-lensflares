@@ -13,6 +13,7 @@ add_library(raytraced-lensflares-lib
         Mesh.h
         GridGenerator.cpp
         GridGenerator.h
+        GlmUtils.h
         )
 
 target_link_libraries(raytraced-lensflares-lib ${CONAN_LIBS} ${CMAKE_DL_LIBS})
