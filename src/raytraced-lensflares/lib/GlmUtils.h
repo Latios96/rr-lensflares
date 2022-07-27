@@ -2,6 +2,7 @@
 #define RR_LENSFLARES_SRC_RAYTRACED_LENSFLARES_LIB_GLMUTILS_H_
 
 #include <fmt/format.h>
+#include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
 template <> struct fmt::formatter<glm::vec3> {
