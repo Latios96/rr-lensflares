@@ -76,7 +76,7 @@ float trace(inout Lens lens, inout vec3 tracedPosition, vec3 tracedDirection, fl
     Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
     if (lens.ior == 0) {
         vec2 pos = intersectAperture(lens, tracedPosition, tracedDirection);
-        aperturePos = (pos.xy/lens.apertureRadius)*0.5+1;
+        aperturePos = (pos.xy/lens.apertureRadius)*0.5+0.5;
         return 0;
     }
 
