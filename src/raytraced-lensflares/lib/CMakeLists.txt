@@ -1,19 +1,21 @@
 add_library(raytraced-lensflares-lib
-        LensSystem.h
-        LensSystem.cpp
-        LensSystems.h
         Geometry.cpp
         Geometry.h
+        GlmUtils.h
         GlslShaders.cpp
         GlslShaders.h
-        Utils.cpp
-        Utils.h
-        Resources.cpp
-        Resources.h
-        Mesh.h
         GridGenerator.cpp
         GridGenerator.h
-        GlmUtils.h
+        LensSystem.cpp
+        LensSystem.h
+        LensSystems.h
+        Mesh.h
+        Ray.cpp
+        Ray.h
+        Resources.cpp
+        Resources.h
+        Utils.cpp
+        Utils.h
         )
 
 target_link_libraries(raytraced-lensflares-lib ${CONAN_LIBS} ${CMAKE_DL_LIBS})

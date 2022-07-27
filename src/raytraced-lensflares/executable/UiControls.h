@@ -10,6 +10,9 @@ struct UiState {
   int currentLensIndex = 4;
   bool isMovingLight;
   glm::vec3 lightPositionOnFilm;
+  float lightX;
+  float lightY;
+  float lightZ = 2500;
 };
 
 void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
@@ -39,6 +42,9 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
                 ImGui::GetIO().Framerate);
 
     ImGui::SliderInt("Reflection Sequence Index", &uiState.sequenceIndex, 0, sequences.size() - 1);
+    ImGui::SliderFloat("light X", &uiState.lightX, -350, 350);
+    ImGui::SliderFloat("light Y", &uiState.lightY, -350, 350);
+    ImGui::SliderFloat("light Z", &uiState.lightZ, -350, 350);
 
     const char *combo_preview_value = availableLensSystems[uiState.currentLensIndex].name.c_str();
     if (ImGui::BeginCombo("Lenses", combo_preview_value)) {

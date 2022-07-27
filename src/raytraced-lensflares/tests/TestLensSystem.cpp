@@ -1,3 +1,4 @@
+#include "GlmCatchUtils.h"
 #include "LensSystem.h"
 #include "LensSystems.h"
 #include <catch2/catch_all.hpp>
@@ -72,6 +73,34 @@ TEST_CASE("LensSystem::traceToFilmPlane") {
     auto positionOnFilm = lensSystem.traceToFilmPlane(sequence, {0, 0, 190}, {0, 0, -1});
 
     REQUIRE(positionOnFilm == glm::vec3(0, 0, 0));
+  }
+}
+
+TEST_CASE("LensSystem::traceRayFromPlaneToWorld") {
+  SECTION("should trace ray along optical axis to world") {
+    LensSystem lensSystem = getAvailableLensSystems()[3];
+    auto sequence = lensSystem.createIdealInteractionSequence();
+
+    auto tracedRay =
+        lensSystem.traceRayFromPlaneToWorld(Ray(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1)));
+
+    REQUIRE(tracedRay.position == glm::vec3(0, 0, lensSystem.lenses[0].center));
+    REQUIRE(tracedRay.direction == glm::vec3(0, 0, 1));
+  }
+
+  SECTION("should trace ray to world") {
+    LensSystem lensSystem = getAvailableLensSystems()[3];
+    auto sequence = lensSystem.createIdealInteractionSequence();
+
+    auto tracedRay =
+        lensSystem.traceRayFromPlaneToWorld(Ray(glm::vec3(1, 1, 0), glm::vec3(0, 0, 1)));
+
+    REQUIRE(tracedRay.position.x == Catch::Approx(-2.035821));
+    REQUIRE(tracedRay.position.y == Catch::Approx(-2.035821));
+    REQUIRE(tracedRay.position.z == Catch::Approx(234.69505f));
+    REQUIRE(tracedRay.direction.x == Catch::Approx(0.010195071));
+    REQUIRE(tracedRay.direction.y == Catch::Approx(0.010195071));
+    REQUIRE(tracedRay.direction.z == Catch::Approx(0.9999f));
   }
 }
 

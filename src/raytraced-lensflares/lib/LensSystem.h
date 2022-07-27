@@ -1,6 +1,7 @@
 #ifndef RR_LENSFLARES_SRC_LENSSYSTEM_H_
 #define RR_LENSFLARES_SRC_LENSSYSTEM_H_
 
+#include "Ray.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
@@ -36,7 +37,7 @@ struct Intersection {
     }
     float eta = iorIn / iorOut;
     float k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0 ? glm::vec3(0, 0, 0) : eta * direction + (eta * cosi - sqrtf(k)) * n;
+    return k < 0 ? direction : eta * direction + (eta * cosi - sqrtf(k)) * n;
   }
 };
 
@@ -83,6 +84,8 @@ struct LensSystem {
 
   glm::vec3 traceToFilmPlane(const std::vector<InteractionEvent> &events, const glm::vec3 &position,
                              const glm::vec3 &direction) const;
+
+  Ray traceRayFromPlaneToWorld(const Ray &ray) const;
 
   float focusPointDistance();
   float getFov(const float filmbackSize) const;

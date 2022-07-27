@@ -1,5 +1,7 @@
 #include "LensSystem.h"
+#include "GlmUtils.h"
 #include <fmt/format.h>
+#include <spdlog/spdlog.h>
 
 LensSystem::LensSystem(const std::string &name, float focalLength,
                        const std::vector<LensData> &lensesData)
@@ -80,6 +82,25 @@ float LensSystem::getFov(const float filmbackSize) const {
   return 2 * atan(filmbackSize / 2.0f * 1.0f / focalLength);
 }
 
+Ray LensSystem::traceRayFromPlaneToWorld(const Ray &ray) const {
+  Ray tracedRay = ray;
+  float ior = 1;
+  for (int i = lenses.size() - 1; i >= 0; i--) {
+    const auto lens = lenses[i];
+    if (lens.ior == 0) {
+      continue;
+    }
+    const auto intersection = lens.intersect(tracedRay.position, tracedRay.direction);
+    const auto direction = glm::normalize(intersection.refract(tracedRay.direction, ior, lens.ior));
+    if (glm::isnan(direction.x)) {
+      intersection.refract(tracedRay.direction, ior, lens.ior);
+    }
+    tracedRay = Ray(intersection.position, direction);
+    ior = lens.ior;
+  };
+  return tracedRay;
+}
+
 LensData::LensData(float curvatureRadius, float thickness, float ior, float apertureRadius)
     : curvatureRadius(curvatureRadius), thickness(thickness), ior(ior),
       apertureRadius(apertureRadius) {}
@@ -130,3 +151,4 @@ bool ReflectionEvent::operator==(const ReflectionEvent &rhs) const {
 }
 
 bool ReflectionEvent::operator!=(const ReflectionEvent &rhs) const { return !(rhs == *this); }
+

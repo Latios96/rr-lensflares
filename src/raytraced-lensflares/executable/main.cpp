@@ -240,8 +240,9 @@ int main() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
 
-    glm::vec3 lightDirection = glm::normalize(uiState.lightPositionOnFilm -
-                                              glm::vec3(0, 0, -lensSystem.focusPointDistance()));
+    const glm::vec3 lightPosition = glm::vec3(uiState.lightX, uiState.lightY, uiState.lightZ);
+    glm::vec3 lightDirection = glm::normalize(lightPosition - glm::vec3(0, 0, 0));
+
     glUniform3fv(lightDirectionPosition, 1, &lightDirection[0]);
 
     for (int i = 0; i < sequences.size(); i++) {
