@@ -1,7 +1,7 @@
 # fmt spdlog gltw cpplocate catch2 glm?
 
 [requires]
-fmt/9.0.0
+fmt/8.1.1
 spdlog/1.10.0
 catch2/3.0.1
 glfw/3.3.7
@@ -9,6 +9,8 @@ whereami/cci.20220112
 tinyobjloader/1.0.6
 glad/0.1.36
 glm/0.9.9.8
+openimageio/2.3.7.2
+boost/1.78.0
 
 [options]
 fmt:header_only=True
@@ -18,6 +20,21 @@ glad:gl_profile=core
 glad:gl_version=4.3
 glad:spec=gl
 glad:no_loader=False
+
+libtiff:jpeg=libjpeg-turbo
+
+openimageio:with_ffmpeg=False
+openimageio:with_freetype=False
+openimageio:with_giflib=False
+openimageio:with_hdf5=False
+openimageio:with_libheif=False
+openimageio:with_libwebp=False
+openimageio:with_opencv=False
+openimageio:with_openvdb=False
+openimageio:with_ptex=False
+openimageio:with_raw=False
+openimageio:with_libjpeg=libjpeg-turbo
+openimageio:with_openjpeg=False
 
 [imports]
 bin,*.dll->./bin

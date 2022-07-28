@@ -5,8 +5,8 @@ uniform int sequenceIndex;
 uniform vec3 lightDirection;
 in vec3 vPos;
 
-out vec3 vcColor;
 out vec2 vAperturePos;
+out float rayStayed;
 
 layout(std430, binding = 3) buffer sequences { ivec2 reflectionSequences[]; };
 
@@ -95,9 +95,9 @@ void main() {
   gridMatrix[3][1] = lightDirection.y * 200;
   gridMatrix[3][2] = lightDirection.z * 200;
 
-  vec2 aperturePos = vec2(0, 0);
-  vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 5 + vec3(0.0, 0.0, 200.0), 1));
-  vec3 tracedDirection = lightDirection;
+    vec2 aperturePos = vec2(0, 0);
+    vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 10 + vec3(0.0, 0.0, 200.0), 1));
+    vec3 tracedDirection = lightDirection;
 
   float ior = 1;
   float maxRelativeDistanceToOpticalAxis = 0;
@@ -130,9 +130,7 @@ void main() {
   float t = (-tracedPosition.z) / tracedDirection.z;
   vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 
-  gl_Position = MVP * vec4(positionOnPlane, 1);
-  float rayLeft = maxRelativeDistanceToOpticalAxis > 1 ? 1 : 0;
-  float rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1 : 0;
-  vcColor = vec3(0, rayStayed, 0);
-  vAperturePos = aperturePos;
+    gl_Position = MVP * vec4(positionOnPlane, 1);
+    rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1 : 0;
+    vAperturePos = aperturePos;
 }

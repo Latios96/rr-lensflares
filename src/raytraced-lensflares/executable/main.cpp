@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <OpenImageIO/imageio.h>
 #include <fmt/format.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -197,7 +198,7 @@ int main() {
   uiState.lightPositionOnFilm = glm::vec3(0, 0, 0);
   static UiState previousState = uiState;
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   auto availableLensSystems = getAvailableLensSystems();
 
@@ -206,6 +207,25 @@ int main() {
 
   GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent>(3, sequences);
   GLuint ssboLensSystem = populateSSBO<Lens>(4, lensSystem.lenses);
+
+  const std::string &filename =
+      (Utils::getExecutableDirectory() / "textures" / "aperture_round.png").string();
+  auto inp = OIIO::ImageInput::open(filename);
+  if (!inp)
+    throw std::runtime_error(inp->geterror());
+  const OIIO::ImageSpec &spec = inp->spec();
+  int xres = spec.width;
+  int yres = spec.height;
+  int channels = spec.nchannels;
+  std::vector<unsigned char> pixels(xres * yres * channels);
+  inp->read_image(OIIO::TypeDesc::UINT8, &pixels[0]);
+  inp->close();
+
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xres, yres, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+  glGenerateMipmap(GL_TEXTURE_2D);
 
   while (!glfwWindowShouldClose(window)) {
     if (uiState.currentLensIndex != previousState.currentLensIndex) {
@@ -245,10 +265,10 @@ int main() {
 
     glUniform3fv(lightDirectionPosition, 1, &lightDirection[0]);
 
-    for (int i = 0; i < sequences.size(); i++) {
-      glUniform1i(sequenceIndexLocation, i);
-      glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
-    }
+    // for (int i = 0; i < sequences.size(); i++) {
+    glUniform1i(sequenceIndexLocation, uiState.sequenceIndex);
+    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+    //}
 
     renderUiControls(uiState, availableLensSystems, sequences);
 

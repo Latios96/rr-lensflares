@@ -23,4 +23,12 @@ add_custom_target(copy-meshes ALL
         ${CMAKE_BINARY_DIR}/bin/meshes
         )
 add_dependencies(raytraced-lensflares copy-meshes)
+
+add_custom_target(copy-textures ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/textures
+        ${CMAKE_BINARY_DIR}/bin/textures
+        )
+add_dependencies(raytraced-lensflares copy-textures)
+
 install(TARGETS raytraced-lensflares DESTINATION bin)
