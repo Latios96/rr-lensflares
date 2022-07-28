@@ -162,6 +162,9 @@ int main() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+
   Mesh mesh;
   readObj(Resources::getMeshResourceByName("grid.obj").string(), mesh);
   GridGenerator gridGenerator;
@@ -226,6 +229,8 @@ int main() {
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xres, yres, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
   glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
   while (!glfwWindowShouldClose(window)) {
     if (uiState.currentLensIndex != previousState.currentLensIndex) {
@@ -265,10 +270,10 @@ int main() {
 
     glUniform3fv(lightDirectionPosition, 1, &lightDirection[0]);
 
-    // for (int i = 0; i < sequences.size(); i++) {
-    glUniform1i(sequenceIndexLocation, uiState.sequenceIndex);
-    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
-    //}
+    for (int i = 0; i < sequences.size(); i++) {
+      glUniform1i(sequenceIndexLocation, i);
+      glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+    }
 
     renderUiControls(uiState, availableLensSystems, sequences);
 
