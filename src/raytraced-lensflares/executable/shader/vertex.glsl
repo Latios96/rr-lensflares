@@ -71,7 +71,7 @@ inout float maxRelativeDistanceToOpticalAxis, inout vec2 aperturePos) {
   Intersection intersection = intersectLens(lens, tracedPosition, tracedDirection);
   if (lens.ior == 0) {
     vec2 pos = intersectAperture(lens, tracedPosition, tracedDirection);
-    aperturePos = (pos.xy / lens.apertureRadius) * 0.5 + 0.5;
+    aperturePos = (pos.xy / 2) * 0.5 + 0.5;
     return 0;
   }
 
@@ -95,9 +95,9 @@ void main() {
   gridMatrix[3][1] = lightDirection.y * 200;
   gridMatrix[3][2] = lightDirection.z * 200;
 
-    vec2 aperturePos = vec2(0, 0);
-    vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 10 + vec3(0.0, 0.0, 200.0), 1));
-    vec3 tracedDirection = lightDirection;
+  vec2 aperturePos = vec2(0, 0);
+  vec3 tracedPosition = vec3(gridMatrix * vec4(vPos * 40 + vec3(0.0, 0.0, 200.0), 1));
+  vec3 tracedDirection = lightDirection;
 
   float ior = 1;
   float maxRelativeDistanceToOpticalAxis = 0;
