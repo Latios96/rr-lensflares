@@ -167,7 +167,7 @@ int main() {
 
   GridGenerator gridGenerator;
   Mesh grid;
-  gridGenerator.generateGrid(grid, 20);
+  gridGenerator.generateGrid(grid, 40);
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);

@@ -19,6 +19,11 @@ void main() {
   float calculatedArea = length(cross(v0v1, v0v2)) / 2;
   float originalArea = 0.1 * 0.1;// todo when changing grid resolution, adjust this!
   intensity = originalArea / calculatedArea;
+
+  if (intensity < 0.03){
+    return;
+  }
+
   for (int i = 0; i < 3; i++) {
     gl_Position = gl_in[i].gl_Position;
     intensity = rayStayed[i] * intensity;
