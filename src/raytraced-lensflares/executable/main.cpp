@@ -165,24 +165,21 @@ int main() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE);
 
-  Mesh mesh;
-  readObj(Resources::getMeshResourceByName("grid.obj").string(), mesh);
   GridGenerator gridGenerator;
   Mesh grid;
   gridGenerator.generateGrid(grid, 20);
-  mesh = grid;
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), mesh.vertices.data(),
+  glBufferData(GL_ARRAY_BUFFER, grid.vertices.size() * sizeof(Vertex), grid.vertices.data(),
                GL_STATIC_DRAW);
 
   GLuint indices_buffer;
   glGenBuffers(1, &indices_buffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int),
-               mesh.indices.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, grid.indices.size() * sizeof(unsigned int),
+               grid.indices.data(), GL_STATIC_DRAW);
 
   const GLuint program = GlslShaders::createProgramm();
 
@@ -272,7 +269,7 @@ int main() {
 
     for (int i = 0; i < sequences.size(); i++) {
       glUniform1i(sequenceIndexLocation, i);
-      glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+      glDrawElements(GL_TRIANGLES, grid.indices.size(), GL_UNSIGNED_INT, nullptr);
     }
 
     renderUiControls(uiState, availableLensSystems, sequences);
