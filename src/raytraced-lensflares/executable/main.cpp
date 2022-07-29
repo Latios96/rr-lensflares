@@ -123,6 +123,16 @@ static glm::ivec2 getInitialLightPositionOnScreen(GLFWwindow *window) {
   return {width / 2, height / 2};
 }
 
+void updateGrid(GLint vertex_buffer, GLint indices_buffer, const Mesh &grid) {
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, grid.vertices.size() * sizeof(Vertex), grid.vertices.data(),
+               GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, grid.indices.size() * sizeof(unsigned int),
+               grid.indices.data(), GL_STATIC_DRAW);
+}
+
 int main() {
   auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(errorCallback);
@@ -168,27 +178,23 @@ int main() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE);
 
-  GridGenerator gridGenerator;
-  Mesh grid;
-  gridGenerator.generateGrid(grid, 40);
-
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, grid.vertices.size() * sizeof(Vertex), grid.vertices.data(),
-               GL_STATIC_DRAW);
 
   GLuint indices_buffer;
   glGenBuffers(1, &indices_buffer);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, grid.indices.size() * sizeof(unsigned int),
-               grid.indices.data(), GL_STATIC_DRAW);
+
+  GridGenerator gridGenerator;
+  Mesh grid;
+  gridGenerator.generateGrid(grid, uiState.subdivs);
+  updateGrid(vertex_buffer, indices_buffer, grid);
 
   const GLuint program = GlslShaders::createProgramm();
 
   const GLint mvp_location = glGetUniformLocation(program, "MVP");
   const GLint lightDirectionPosition = glGetUniformLocation(program, "lightDirection");
   const GLint sequenceIndexLocation = glGetUniformLocation(program, "sequenceIndex");
+  const GLint subdivisionsLocation = glGetUniformLocation(program, "subdivisions");
   const GLint vpos_location = glGetAttribLocation(program, "vPos");
 
   GLuint vertex_array;
@@ -238,6 +244,12 @@ int main() {
       updateSSBO<ReflectionEvent>(ssboReflectionEvents, 3, sequences);
       updateSSBO<Lens>(ssboLensSystem, 4, lensSystem.lenses);
     }
+    if (uiState.subdivs != previousState.subdivs) {
+      grid.vertices.clear();
+      grid.indices.clear();
+      gridGenerator.generateGrid(grid, uiState.subdivs);
+      updateGrid(vertex_buffer, indices_buffer, grid);
+    }
     previousState = uiState;
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -257,6 +269,7 @@ int main() {
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
+    glUniform1i(subdivisionsLocation, uiState.subdivs);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
