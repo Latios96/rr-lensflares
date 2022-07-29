@@ -100,7 +100,10 @@ static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
   glm::vec2 relativePosition = glm::vec2(xpos / width, ypos / height);
   glm::vec3 positionOnFilm =
       glm::vec3(36.0f / 2 - 36 * relativePosition.x, 24.0f / 2 - 24 * relativePosition.y, 0);
-  uiState.lightPositionOnFilm = positionOnFilm;
+  const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+  uiState.lightPosition =
+      glm::vec3(relativePosition.x * 350.0f * 2 - 350.0f,
+                (relativePosition.y * 350.0f * 2 - 350.0f) * aspectRatio, 3500.0f);
 }
 
 static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
@@ -195,7 +198,7 @@ int main() {
   glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, pos));
 
-  uiState.lightPositionOnFilm = glm::vec3(0, 0, 0);
+  uiState.lightPosition = glm::vec3(0, 0, 3500.0f);
   static UiState previousState = uiState;
 
   auto availableLensSystems = getAvailableLensSystems();
@@ -260,7 +263,7 @@ int main() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboReflectionEvents);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssboLensSystem);
 
-    const glm::vec3 lightPosition = glm::vec3(uiState.lightX, uiState.lightY, uiState.lightZ);
+    const glm::vec3 lightPosition = glm::vec3(uiState.lightPosition);
     glm::vec3 lightDirection = glm::normalize(lightPosition - glm::vec3(0, 0, 0));
 
     glUniform3fv(lightDirectionPosition, 1, &lightDirection[0]);
