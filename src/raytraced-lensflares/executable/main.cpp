@@ -198,8 +198,6 @@ int main() {
   uiState.lightPositionOnFilm = glm::vec3(0, 0, 0);
   static UiState previousState = uiState;
 
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
   auto availableLensSystems = getAvailableLensSystems();
 
   LensSystem lensSystem = availableLensSystems[uiState.currentLensIndex];
