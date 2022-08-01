@@ -13,6 +13,7 @@ struct UiState {
   bool lockLight = false;
   bool useBladedTexture = true;
   float intensityCutoff = 0.03f;
+  float lightIntensity = 1;
 };
 
 void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
@@ -63,6 +64,7 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
     ImGui::Checkbox("Use bladed aperture texture", &uiState.useBladedTexture);
     ImGui::SliderInt("Subdivions", &uiState.subdivs, 0, 60);
     ImGui::SliderFloat("Intensity cutoff", &uiState.intensityCutoff, 0, 0.1);
+    ImGui::SliderFloat("Light Intensity", &uiState.lightIntensity, 1, 50);
 
     ImGui::End();
   }

@@ -218,6 +218,7 @@ int main() {
   const GLint sequenceIndexLocation = glGetUniformLocation(program, "sequenceIndex");
   const GLint subdivisionsLocation = glGetUniformLocation(program, "subdivisions");
   const GLint intensityCutoffLocation = glGetUniformLocation(program, "intensityCutoff");
+  const GLint lightIntensityLocation = glGetUniformLocation(program, "lightIntensityLocation");
   const GLint vpos_location = glGetAttribLocation(program, "vPos");
 
   GLuint vertex_array;
@@ -283,6 +284,7 @@ int main() {
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
     glUniform1i(subdivisionsLocation, uiState.subdivs);
     glUniform1f(intensityCutoffLocation, uiState.intensityCutoff);
+    glUniform1f(lightIntensityLocation, uiState.lightIntensity);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);

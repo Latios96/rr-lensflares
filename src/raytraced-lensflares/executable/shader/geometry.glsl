@@ -2,6 +2,7 @@
 
 uniform int subdivisions;
 uniform float intensityCutoff;
+uniform float lightIntensityLocation;
 
 layout(triangles) in;
 layout(triangle_strip) out;
@@ -21,7 +22,7 @@ void main() {
   vec3 v0v2 = vec3(gl_in[2].gl_Position - gl_in[0].gl_Position);
   float calculatedArea = length(cross(v0v1, v0v2)) / 2;
   float originalArea = pow(1.0/20, 2);
-  intensity = originalArea / calculatedArea;
+  intensity = lightIntensityLocation * originalArea / calculatedArea;
 
   if (intensity < intensityCutoff){
     return;
