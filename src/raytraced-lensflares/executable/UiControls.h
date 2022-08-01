@@ -10,9 +10,10 @@ struct UiState {
   int currentLensIndex = 2;
   bool isMovingLight;
   glm::vec3 lightPosition;
-  int subdivs = 20;
+  int subdivs = 30;
   bool lockLight = false;
   bool useBladedTexture = true;
+  float intensityCutoff = 0.03f;
 };
 
 void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
@@ -62,6 +63,7 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
     ImGui::Checkbox("Lock light position", &uiState.lockLight);
     ImGui::Checkbox("Use bladed aperture texture", &uiState.useBladedTexture);
     ImGui::SliderInt("Subdivions", &uiState.subdivs, 0, 60);
+    ImGui::SliderFloat("Intensity cutoff", &uiState.intensityCutoff, 0, 0.1);
 
     ImGui::End();
   }

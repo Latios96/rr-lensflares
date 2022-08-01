@@ -1,6 +1,7 @@
 #version 460
 
 uniform int subdivisions;
+uniform float intensityCutoff;
 
 layout(triangles) in;
 layout(triangle_strip) out;
@@ -22,7 +23,7 @@ void main() {
   float originalArea = pow(1.0/20, 2);
   intensity = originalArea / calculatedArea;
 
-  if (intensity < 0.03){
+  if (intensity < intensityCutoff){
     return;
   }
 
