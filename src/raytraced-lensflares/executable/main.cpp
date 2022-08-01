@@ -131,6 +131,30 @@ void updateGrid(GLint vertex_buffer, GLint indices_buffer, const Mesh &grid) {
                grid.indices.data(), GL_STATIC_DRAW);
 }
 
+GLuint readTexture(const std::string &textureName) {
+  const std::string &filename =
+      (Utils::getExecutableDirectory() / "textures" / textureName).string();
+  auto inp = OIIO::ImageInput::open(filename);
+  if (!inp)
+    throw std::runtime_error(inp->geterror());
+  const OIIO::ImageSpec &spec = inp->spec();
+  int xres = spec.width;
+  int yres = spec.height;
+  int channels = spec.nchannels;
+  std::vector<unsigned char> pixels(xres * yres * channels);
+  inp->read_image(OIIO::TypeDesc::UINT8, &pixels[0]);
+  inp->close();
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xres, yres, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  return texture;
+}
+
 int main() {
   auto console = spdlog::stdout_color_mt("console");
   glfwSetErrorCallback(errorCallback);
@@ -213,26 +237,8 @@ int main() {
   GLuint ssboReflectionEvents = populateSSBO<ReflectionEvent>(3, sequences);
   GLuint ssboLensSystem = populateSSBO<Lens>(4, lensSystem.lenses);
 
-  const std::string &filename =
-      (Utils::getExecutableDirectory() / "textures" / "aperture_round.png").string();
-  auto inp = OIIO::ImageInput::open(filename);
-  if (!inp)
-    throw std::runtime_error(inp->geterror());
-  const OIIO::ImageSpec &spec = inp->spec();
-  int xres = spec.width;
-  int yres = spec.height;
-  int channels = spec.nchannels;
-  std::vector<unsigned char> pixels(xres * yres * channels);
-  inp->read_image(OIIO::TypeDesc::UINT8, &pixels[0]);
-  inp->close();
-
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, xres, yres, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  const GLint roundedTexture = readTexture("aperture_round.png");
+  const GLint bladedTexture = readTexture("aperture_bladed.png");
 
   while (!glfwWindowShouldClose(window)) {
     if (uiState.currentLensIndex != previousState.currentLensIndex) {
@@ -249,6 +255,13 @@ int main() {
       updateGrid(vertex_buffer, indices_buffer, grid);
     }
     previousState = uiState;
+
+    if (uiState.useBladedTexture) {
+      glBindTexture(GL_TEXTURE_2D, bladedTexture);
+    } else {
+      glBindTexture(GL_TEXTURE_2D, roundedTexture);
+    }
+
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
 

@@ -12,6 +12,7 @@ struct UiState {
   glm::vec3 lightPosition;
   int subdivs = 20;
   bool lockLight = false;
+  bool useBladedTexture = true;
 };
 
 void renderUiControls(UiState &uiState, const std::vector<LensSystem> &availableLensSystems,
@@ -59,6 +60,7 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
     }
 
     ImGui::Checkbox("Lock light position", &uiState.lockLight);
+    ImGui::Checkbox("Use bladed aperture texture", &uiState.useBladedTexture);
     ImGui::SliderInt("Subdivions", &uiState.subdivs, 0, 60);
 
     ImGui::End();
