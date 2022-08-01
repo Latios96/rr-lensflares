@@ -6,7 +6,7 @@
 
 std::vector<LensSystem> getAvailableLensSystems() {
   return {
-      {"# CANON, US Patent 5537259, F/2.8, 70-200mm (70)",
+      {"CANON F/2.8, 70-200mm (70)",
        70.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
@@ -21,7 +21,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {132.947, 5.9, 1.517, 21.0},  {-77.546, 13.94, 1, 21.0},     {-39.485, 1.8, 1.834, 21.0},
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
-      {"# CANON, US Patent 5537259, F/2.8, 70-200mm (135)",
+      {"CANON F/2.8, 70-200mm (135)",
        135.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
@@ -36,7 +36,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {132.947, 5.9, 1.517, 21.0},  {-77.546, 13.94, 1, 21.0},     {-39.485, 1.8, 1.834, 21.0},
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
-      {"# CANON, US Patent 5537259, F/2.8, 70-200mm (200)",
+      {"CANON F/2.8, 70-200mm (200)",
        200.f,
        {
            {118.63, 0.42, 1, 38.0},      {128.135, 8.68, 1.497, 38.0},  {-263.46, 0.1, 1, 38.0},
@@ -51,7 +51,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {132.947, 5.9, 1.517, 21.0},  {-77.546, 13.94, 1, 21.0},     {-39.485, 1.8, 1.834, 21.0},
            {-95.683, 0.15, 1, 21.0},     {147.644, 3.62, 1.743, 21.0},  {-205.76, 54.5, 1, 21.0},
        }},
-      {"# Angenieux, US Patent 2701982; f/1.1, 100mm",
+      {"Angenieux f/1.1, 100mm",
        100.f,
        {
            {559.28, 0.23, 1, 54.0},
@@ -82,7 +82,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-331.43, 6.03, 1.7506, 20.0},
            {-59.45, 71.0, 1, 20.0},
        }},
-      {"# double gauss f/2.5, Lens Design, Milton Laikin, 1992, Page 75",
+      {"double gauss f/2.5, Lens Design, Milton Laikin, 1992, Page 75",
        50.f,
        {
            {351.08642, 0.5842, 1, 40.64},
@@ -96,7 +96,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {166.9542, 10.0076, 1.6204, 38.1},
            {-225.93554, 70.6628, 1, 38.1},
        }},
-      {"# double gauss, Modern Lens Design, Warren J. Smith, 1992, Page 312",
+      {"double gauss, Modern Lens Design, Warren J. Smith, 1992, Page 312",
        50.f,
        {
            {169.66, 0.24, 1, 50.4},
@@ -110,7 +110,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {874.13, 6.44, 1.717, 40.0},
            {-79.46, 72.228, 1, 40.0},
        }},
-      {"# fisheye 220 degree (shimizu)",
+      {"fisheye 220 degree (shimizu)",
        50.f,
        {
            {52.5, 28.0, 1, 52.3},       {76.4, 3.8, 1.51680, 50.0},   {31.521, 21.8, 1, 30.5},
@@ -122,7 +122,7 @@ std::vector<LensSystem> getAvailableLensSystems() {
            {-14.4, 0.6, 1.79631, 10.0}, {-34.5, 0.1, 1, 10.0},        {-110.0, 1.0, 1.71736, 10.0},
            {35.0, 3.5, 1.51680, 10.0},  {-25.763, 39.8, 1, 10.0},
        }},
-      {"# wide angle zoom lens, Inventor: Takayuki Itoh, US Patent 4196968, "
+      {"wide angle zoom lens, Inventor: Takayuki Itoh, US Patent 4196968, "
        "100-145mm",
        100.f,
        {
