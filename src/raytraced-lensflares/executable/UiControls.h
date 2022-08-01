@@ -6,8 +6,7 @@
 #include <GLFW/glfw3.h>
 
 struct UiState {
-  int sequenceIndex;
-  int currentLensIndex = 2;
+  int currentLensIndex = 0;
   bool isMovingLight;
   glm::vec3 lightPosition;
   int subdivs = 30;
