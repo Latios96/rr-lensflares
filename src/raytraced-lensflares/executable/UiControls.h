@@ -62,7 +62,7 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
 
     ImGui::Checkbox("Lock light position", &uiState.lockLight);
     ImGui::Checkbox("Use bladed aperture texture", &uiState.useBladedTexture);
-    ImGui::SliderInt("Subdivions", &uiState.subdivs, 0, 60);
+    ImGui::SliderInt("Subdivisions", &uiState.subdivs, 0, 300);
     ImGui::SliderFloat("Intensity cutoff", &uiState.intensityCutoff, 0, 0.1);
     ImGui::SliderFloat("Light Intensity", &uiState.lightIntensity, 1, 50);
 
