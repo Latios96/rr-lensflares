@@ -121,12 +121,6 @@ static void mouseButtonCallback(GLFWwindow *window, int button, int action, int 
   }
 }
 
-static glm::ivec2 getInitialLightPositionOnScreen(GLFWwindow *window) {
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  return {width / 2, height / 2};
-}
-
 void updateGrid(GLint vertex_buffer, GLint indices_buffer, const Mesh &grid) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, grid.vertices.size() * sizeof(Vertex), grid.vertices.data(),

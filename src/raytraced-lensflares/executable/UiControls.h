@@ -40,8 +40,6 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
 
-    // ImGui::SliderInt("Reflection Sequence Index", &uiState.sequenceIndex, 0, sequences.size() -
-    // 1);
     ImGui::Checkbox("Lock light position", &uiState.lockLight);
     ImGui::SliderInt("Subdivions", &uiState.subdivs, 0, 60);
 
