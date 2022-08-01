@@ -39,7 +39,11 @@ void renderUiControls(UiState &uiState, const std::vector<LensSystem> &available
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
-    ImGui::Text(fmt::format("Tracing {} reflection sequences", sequences.size()).c_str());
+    const int rayCount = sequences.size() * (uiState.subdivs + 1) * (uiState.subdivs + 1);
+    ImGui::Text(fmt::format(std::locale("en_US.UTF-8"),
+                            "Tracing {} reflection sequences ({:L} rays)", sequences.size(),
+                            rayCount)
+                    .c_str());
 
     const char *combo_preview_value = availableLensSystems[uiState.currentLensIndex].name.c_str();
     if (ImGui::BeginCombo("Lenses", combo_preview_value)) {
