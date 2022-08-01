@@ -110,6 +110,10 @@ static void mouseButtonCallback(GLFWwindow *window, int button, int action, int 
   const bool lightMoveStart = button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS;
   const bool lightMoveEnd = button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE;
 
+  if (uiState.lockLight) {
+    return;
+  }
+
   if (lightMoveStart) {
     uiState.isMovingLight = true;
   } else if (lightMoveEnd) {
