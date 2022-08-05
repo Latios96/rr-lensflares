@@ -19,9 +19,11 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
-If this succeeds, you can open the generated Visual Studio project in Visual Studio. You can also use another IDE like Clion, just make sure to pass the `OptiX_ROOT_DIR` in the Cmake options.
+If this succeeds, you can open the generated Visual Studio project in Visual Studio. You can also use another IDE like
+Clion.
 
-If you prefer to build on the command line, use this command: (As far as I tested, this works only with the Visual Studio generator, not with ninja)
+If you prefer to build on the command line, use this command: (As far as I tested, this works only with the Visual
+Studio generator, not with ninja)
 ```
 cmake --build . --config Release -- /M:%NUMBER_OF_PROCESSORS%
 ```
