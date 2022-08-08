@@ -130,7 +130,7 @@ void main() {
   float t = (-tracedPosition.z) / tracedDirection.z;
   vec3 positionOnPlane = tracedPosition + tracedDirection * t;
 
-    gl_Position = MVP * vec4(positionOnPlane, 1);
-    rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1 : 0;
-    vAperturePos = aperturePos;
+  gl_Position = MVP * vec4(positionOnPlane, 1);
+  rayStayed = maxRelativeDistanceToOpticalAxis <= 1 ? 1 : 0;
+  vAperturePos = aperturePos;
 }

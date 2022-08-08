@@ -6,6 +6,4 @@ out vec4 fragment;
 
 uniform sampler2D apertureTexture;
 
-void main() {
-    fragment = texture(apertureTexture, textureCoordinate) * intensity;
-}
+void main() { fragment = texture(apertureTexture, textureCoordinate) * intensity; }

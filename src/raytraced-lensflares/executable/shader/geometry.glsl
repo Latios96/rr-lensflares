@@ -21,10 +21,10 @@ void main() {
   vec3 v0v1 = vec3(gl_in[1].gl_Position - gl_in[0].gl_Position);
   vec3 v0v2 = vec3(gl_in[2].gl_Position - gl_in[0].gl_Position);
   float calculatedArea = length(cross(v0v1, v0v2)) / 2;
-  float originalArea = pow(1.0/20, 2);
+  float originalArea = pow(1.0 / 20, 2);
   intensity = lightIntensityLocation * originalArea / calculatedArea;
 
-  if (intensity < intensityCutoff){
+  if (intensity < intensityCutoff) {
     return;
   }
 
